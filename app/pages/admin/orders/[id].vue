@@ -43,7 +43,7 @@
           <div class="flex items-center gap-2">
             <span class="text-xs font-semibold px-2 py-0.5 rounded-full" :class="paymentStatusClass(order.paymentStatus)">{{ paymentStatusLabel(order.paymentStatus) }}</span>
             <button
-              v-if="['bakong', 'ppcbank'].includes(order.paymentMethod) && order.paymentStatus !== 'paid' && hasPermission('order.manage')"
+              v-if="order.paymentMethod === 'ppcbank' && order.paymentStatus !== 'paid' && hasPermission('order.manage')"
               type="button"
               class="text-xs text-rust hover:underline disabled:opacity-50"
               :disabled="verifyingPayment"
@@ -55,7 +55,9 @@
         </div>
         <div v-if="order.invoice" class="flex items-center justify-between text-sm">
           <span class="text-muted">លេខតម្រុយធនាគារ (Invoice)</span>
-          <span class="font-medium font-mono text-xs">{{ order.invoice }}</span>
+          <NuxtLink :to="`/admin/orders/${order.id}`" class="font-medium font-mono text-xs text-rust hover:underline" title="ចម្លងតំណភ្ជាប់ទៅកាន់ការបញ្ជាទិញនេះ">
+            {{ order.invoice }}
+          </NuxtLink>
         </div>
         <div class="flex items-center justify-between text-sm">
           <span class="text-muted">លេខទូរស័ព្ទ</span>
@@ -69,70 +71,6 @@
           <span>សរុប</span>
           <span class="font-sans font-bold text-lg">${{ order.total.toFixed(2) }}</span>
         </div>
-      </div>
-
-      <!-- Full Bakong transaction detail (check_transaction_by_hash) —
-           richer than the plain paid/unpaid status above: which bank the
-           money actually came from and landed in, plus timestamps. Only
-           available once a transaction hash has actually been captured
-           (i.e. the order was successfully verified paid at least once). -->
-      <div v-if="order.paymentMethod === 'bakong'" class="card-surface p-4 mb-4">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-sm font-semibold">ព័ត៌មានលម្អិតប្រតិបត្តិការ Bakong</p>
-          <button
-            type="button"
-            class="text-xs text-rust hover:underline disabled:opacity-50"
-            :disabled="loadingTxDetail"
-            @click="onLoadTransactionDetail"
-          >
-            {{ loadingTxDetail ? 'កំពុងផ្ទុក…' : 'មើលព័ត៌មានលម្អិត' }}
-          </button>
-        </div>
-        <p v-if="txDetailError" class="text-xs text-red-600">{{ txDetailError }}</p>
-        <div v-else-if="txDetail" class="space-y-1.5 text-sm">
-          <!-- Explicit, server-computed check — not something the admin
-               has to eyeball themselves by comparing account IDs. -->
-          <div
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium mb-2"
-            :class="txDetail.accountMatch ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-          >
-            <CheckCircle2 v-if="txDetail.accountMatch" :size="14" />
-            <AlertTriangle v-else :size="14" />
-            {{ txDetail.accountMatch
-              ? 'ការទូទាត់នេះបានចូលទៅគណនីត្រឹមត្រូវរបស់ហាង'
-              : 'ការព្រមាន៖ គណនីអ្នកទទួលមិនត្រូវគ្នានឹងគណនីដែលបានកំណត់ទេ' }}
-          </div>
-
-          <div class="flex items-center justify-between">
-            <span class="text-muted">គណនីអ្នកផ្ញើ</span>
-            <span class="font-medium">{{ txDetail.fromAccountId }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-muted">គណនីអ្នកទទួល</span>
-            <span class="font-medium">{{ txDetail.toAccountId }}</span>
-          </div>
-          <div v-if="txDetail.trackingStatus" class="flex items-center justify-between">
-            <span class="text-muted">ស្ថានភាពតាមដាន</span>
-            <span class="font-medium">{{ txDetail.trackingStatus }}</span>
-          </div>
-          <div v-if="txDetail.receiverBank" class="flex items-center justify-between">
-            <span class="text-muted">ធនាគារអ្នកទទួល</span>
-            <span class="font-medium">{{ txDetail.receiverBank }}</span>
-          </div>
-          <div v-if="txDetail.receiverBankAccount" class="flex items-center justify-between">
-            <span class="text-muted">គណនីធនាគារអ្នកទទួល</span>
-            <span class="font-medium">{{ txDetail.receiverBankAccount }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-muted">ចំនួនទឹកប្រាក់</span>
-            <span class="font-medium">{{ txDetail.amount }} {{ txDetail.currency }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-muted">ពេលទូទាត់</span>
-            <span class="font-medium">{{ formatMs(txDetail.acknowledgedDateMs) }}</span>
-          </div>
-        </div>
-        <p v-else class="text-xs text-muted">ចុច "មើលព័ត៌មានលម្អិត" ដើម្បីទាញយកព័ត៌មានប្រតិបត្តិការពេញលេញពី Bakong។</p>
       </div>
 
       <div v-if="hasPermission('order.manage')" class="card-surface p-4">
@@ -158,14 +96,14 @@
 definePageMeta({ layout: 'admin', permission: 'order.view' })
 
 import { ref, onMounted } from 'vue'
-import { ChevronLeft, CheckCircle2, AlertTriangle } from 'lucide-vue-next'
+import { ChevronLeft } from 'lucide-vue-next'
 import { useAdminOrders } from '~/composables/useAdminOrders'
 import { useAuth } from '~/composables/useAuth'
 import { useStore } from '~/composables/useStore'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
 
 const route = useRoute()
-const { getOrder, updateOrderStatus, verifyPayment, getTransactionDetail } = useAdminOrders()
+const { getOrder, updateOrderStatus, verifyPayment } = useAdminOrders()
 const { hasPermission } = useAuth()
 const { showToast } = useStore()
 
@@ -173,9 +111,6 @@ const order = ref(null)
 const loading = ref(true)
 const statusValue = ref('')
 const verifyingPayment = ref(false)
-const txDetail = ref(null)
-const txDetailError = ref('')
-const loadingTxDetail = ref(false)
 
 const statusOptions = [
   { value: 'pending', label: 'កំពុងរង់ចាំ' },
@@ -226,24 +161,6 @@ async function onVerifyPayment() {
   } finally {
     verifyingPayment.value = false
   }
-}
-
-async function onLoadTransactionDetail() {
-  txDetailError.value = ''
-  loadingTxDetail.value = true
-  try {
-    const res = await getTransactionDetail(route.params.id)
-    txDetail.value = res.data
-  } catch (e) {
-    txDetailError.value = e.message || 'មិនអាចទាញយកព័ត៌មានលម្អិតបានទេ'
-  } finally {
-    loadingTxDetail.value = false
-  }
-}
-
-function formatMs(ms) {
-  if (!ms) return '—'
-  return new Date(ms).toLocaleDateString('km-KH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function formatDate(iso) {

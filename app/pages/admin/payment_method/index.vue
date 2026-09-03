@@ -102,7 +102,7 @@ const error = ref('')
 async function load() {
   loading.value = true
   try {
-    // Payment methods are a small, fixed set (cash/Bakong/PPCBank) — a
+    // Payment methods are a small, fixed set (cash/PPCBank) — a
     // single page comfortably covers all of them without needing real
     // pagination controls in the UI, but the request still goes through
     // the same paginated admin endpoint every other admin list uses, for

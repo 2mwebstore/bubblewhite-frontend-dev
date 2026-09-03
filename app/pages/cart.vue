@@ -61,9 +61,19 @@
             </button>
           </div>
 
-          <div class="card-surface p-4 flex items-center justify-between">
-            <p class="font-semibold">សរុប</p>
-            <p class="font-sans font-bold text-xl">${{ subtotal.toFixed(2) }}</p>
+          <div class="card-surface p-4 space-y-2">
+            <div class="flex items-center justify-between text-sm text-muted">
+              <p>មធ្យម</p>
+              <p>${{ subtotal.toFixed(2) }}</p>
+            </div>
+            <div v-if="shippingFee > 0" class="flex items-center justify-between text-sm text-muted">
+              <p>ថ្លៃដឹកជញ្ជូន</p>
+              <p>${{ shippingFee.toFixed(2) }}</p>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-line">
+              <p class="font-semibold">សរុប</p>
+              <p class="font-sans font-bold text-xl">${{ grandTotal.toFixed(2) }}</p>
+            </div>
           </div>
 
           <!-- Payment method -->
@@ -80,9 +90,7 @@
               :searchable="false"
             />
             <p class="text-xs text-muted mt-3">
-              {{ paymentMethod === 'bakong'
-                ? 'យើងនឹងផ្ញើលេខកូដ Bakong KHQR ជូនអ្នកបន្ទាប់ពីបញ្ជាក់ការបញ្ជាទិញ។'
-                : paymentMethod === 'ppcbank'
+              {{ paymentMethod === 'ppcbank'
                 ? 'អ្នកនឹងត្រូវបានបញ្ជូនទៅកាន់គេហទំព័រ PPCBank ដើម្បីបញ្ចប់ការទូទាត់។'
                 : 'ទូទាត់ជាសាច់ប្រាក់នៅពេលទទួលទំនិញ ឬមកយកដោយផ្ទាល់។' }}
             </p>
@@ -151,6 +159,14 @@
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full" :class="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
             </div>
           </NuxtLink>
+
+          <!-- Sentinel — an IntersectionObserver on this element triggers
+               loading the next page as it scrolls into view, rather than
+               a raw scroll listener firing on every pixel of scroll. Only
+               rendered while there's genuinely more to load. -->
+          <div v-if="ordersHasMore" ref="ordersSentinel" class="py-4 flex justify-center">
+            <Loader2 v-if="loadingMoreOrders" :size="18" class="animate-spin text-muted" />
+          </div>
         </div>
       </div>
 
@@ -187,9 +203,17 @@
                   <span class="text-muted">របៀបទូទាត់</span>
                   <span class="font-medium">{{ paymentLabel(paymentMethod) }}</span>
                 </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-muted">មធ្យម</span>
+                  <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
+                </div>
+                <div v-if="shippingFee > 0" class="flex items-center justify-between">
+                  <span class="text-muted">ថ្លៃដឹកជញ្ជូន</span>
+                  <span class="font-medium">${{ shippingFee.toFixed(2) }}</span>
+                </div>
                 <div class="flex items-center justify-between font-semibold pt-1.5 border-t border-line">
                   <span>សរុប</span>
-                  <span class="font-sans font-bold text-lg">${{ subtotal.toFixed(2) }}</span>
+                  <span class="font-sans font-bold text-lg">${{ grandTotal.toFixed(2) }}</span>
                 </div>
               </div>
 
@@ -203,7 +227,7 @@
                   <Loader2 v-if="checkingOut" :size="16" class="animate-spin" />
                   {{ checkingOut
                     ? 'កំពុងដាក់ការបញ្ជាទិញ…'
-                    : paymentMethod === 'bakong' || paymentMethod === 'ppcbank'
+                    : paymentMethod === 'ppcbank'
                     ? 'បន្ទាប់ →'
                     : 'បញ្ជាក់ការបញ្ជាទិញ' }}
                 </button>
@@ -212,21 +236,13 @@
           </div>
         </Transition>
       </Teleport>
-
-      <BakongPaymentModal
-        :open="bakongModalOpen"
-        :amount="subtotal"
-        :bill-number="bakongBillNumber"
-        @close="bakongModalOpen = false"
-        @paid="onCheckout"
-      />
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { Trash2, Loader2, QrCode, Landmark, Banknote } from 'lucide-vue-next'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { Trash2, Loader2, Landmark, Banknote } from 'lucide-vue-next'
 import { useCart } from '~/composables/useCart'
 import { useOrders } from '~/composables/useOrders'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
@@ -242,6 +258,11 @@ const router = useRouter()
 const route = useRoute()
 const { state, isLoggedIn } = useCustomerAuth()
 const { items, subtotal, loading, fetchCart, updateQuantity, removeItem } = useCart()
+// Same module-level caching pattern as usePaymentMethods — shared across
+// every page that needs settings, not re-fetched per component.
+const { settings: siteSettings, ensureLoaded: ensureSiteSettingsLoaded } = useSiteSettings()
+const shippingFee = computed(() => siteSettings.value?.shippingFee || 0)
+const grandTotal = computed(() => subtotal.value + shippingFee.value)
 const { checkout, initiatePPCBankCheckout, getPPCBankReturnStatus, listOrders } = useOrders()
 const { showToast } = useStore()
 const { fieldErrors, setFromError, clear: clearFieldError, watchField } = useFieldErrors()
@@ -249,8 +270,8 @@ const { fieldErrors, setFromError, clear: clearFieldError, watchField } = useFie
 const tab = ref('cart')
 // Fallback icons for any payment method without an admin-uploaded logo
 // yet (see /admin/payment_method) — generic, not brand-specific, since no
-// official Bakong/PPCBank logo files are available to this codebase.
-const FALLBACK_ICONS = { bakong: QrCode, ppcbank: Landmark, cash: Banknote }
+// official PPCBank logo files are available to this codebase.
+const FALLBACK_ICONS = { ppcbank: Landmark, cash: Banknote }
 
 // Payment options now come from the real, admin-managed payment methods
 // table (see /admin/payment_method), not hardcoded booleans — this is a
@@ -260,13 +281,12 @@ const FALLBACK_ICONS = { bakong: QrCode, ppcbank: Landmark, cash: Banknote }
 const { methods: paymentMethodList, ensureLoaded: ensurePaymentMethodsLoaded } = usePaymentMethods()
 const paymentOptions = computed(() => {
   const list = paymentMethodList.value
-  // While the list hasn't loaded yet, fall back to all three via generic
+  // While the list hasn't loaded yet, fall back to both via generic
   // icons rather than an empty list — avoids a flash of "no payment
   // methods available" on first render; the backend check is still
   // authoritative regardless.
   if (!list) {
     return [
-      { value: 'bakong', label: 'Bakong KHQR', icon: QrCode },
       { value: 'ppcbank', label: 'PPCBank KHQR', icon: Landmark },
       { value: 'cash', label: 'សាច់ប្រាក់', icon: Banknote },
     ]
@@ -277,7 +297,7 @@ const paymentOptions = computed(() => {
     icon: pm.imageUrl || FALLBACK_ICONS[pm.code],
   }))
 })
-const paymentMethod = ref('bakong')
+const paymentMethod = ref('cash')
 const address = ref('')
 // Defaults to the customer's account phone, but stays fully editable per
 // order — e.g. ordering for delivery to someone else's number.
@@ -285,8 +305,6 @@ const phone = ref('')
 const checkingOut = ref(false)
 const checkoutError = ref('')
 const confirmOpen = ref(false)
-const bakongModalOpen = ref(false)
-const bakongBillNumber = ref('')
 
 watchField(address, 'address')
 watchField(phone, 'phone')
@@ -322,16 +340,17 @@ onMounted(async () => {
     phone.value = state.customer?.phone || ''
   }
   ensurePaymentMethodsLoaded()
+  ensureSiteSettingsLoaded()
 })
 
 // If the currently-selected method becomes unavailable once settings load
-// (e.g. defaulted to 'bakong' but an admin has it disabled), fall back to
+// (e.g. defaulted to a method an admin has since disabled), fall back to
 // whatever's actually offered rather than leaving a dead selection.
 // Sets the default selection to whichever payment method is marked
 // primary (see /admin/payment_method) the first time the real list loads
-// — replaces the previous hardcoded default of always starting on
-// 'bakong'. Falls back to the first available option if none is marked
-// primary (shouldn't normally happen — the seed always marks one).
+// — replaces a hardcoded default. Falls back to the first available
+// option if none is marked primary (shouldn't normally happen — the seed
+// always marks one).
 watch(paymentMethodList, (list) => {
   if (!list || !list.length) return
   const primary = list.find((pm) => pm.isPrimary)
@@ -377,17 +396,9 @@ function onOpenConfirm() {
   confirmOpen.value = true
 }
 
-// Cash: this button places the order directly. Bakong: it instead opens
-// the scan-to-pay modal — the order itself only gets created once payment
-// is confirmed there (either auto-detected or manually confirmed), see
-// the BakongPaymentModal's @paid handler below.
+// Cash: this button places the order directly. PPCBank: it instead
+// redirects to PPCBank's hosted payment page (see onPPCBankCheckout).
 function onConfirmSummary() {
-  if (paymentMethod.value === 'bakong') {
-    bakongBillNumber.value = `BW-${Date.now()}`
-    confirmOpen.value = false
-    bakongModalOpen.value = true
-    return
-  }
   if (paymentMethod.value === 'ppcbank') {
     onPPCBankCheckout()
     return
@@ -396,7 +407,7 @@ function onConfirmSummary() {
 }
 
 // PPCBank's flow redirects the customer away from this site entirely —
-// unlike Bakong/cash, there's no "come back and see it worked" moment
+// unlike cash, there's no "come back and see it worked" moment
 // on this page; the order is created (pending) server-side BEFORE the
 // redirect, then PPCBank sends the customer to /orders/ppcbank-return
 // once they've paid (or bailed), which is what actually confirms status.
@@ -421,58 +432,94 @@ async function onPPCBankCheckout() {
   }
 }
 
-// paymentReference is only passed when triggered from BakongPaymentModal's
-// @paid event (the KHQR's MD5 hash — what the backend independently
-// verifies against, see CheckBakongPaymentByMD5 in the Go backend) —
-// undefined for the direct cash path, matching checkout()'s optional
-// default.
-async function onCheckout(paymentReference) {
+// Cash-only now — Bakong (the only other caller of this function) was
+// removed; PPCBank has its own separate flow (onPPCBankCheckout) since it
+// redirects away from the site entirely rather than confirming in-page.
+async function onCheckout() {
   checkoutError.value = ''
   clearFieldError()
   checkingOut.value = true
   try {
-    const res = await checkout(paymentMethod.value, address.value, phone.value, paymentReference)
+    const res = await checkout(paymentMethod.value, address.value, phone.value)
     showToast('បានដាក់ការបញ្ជាទិញដោយជោគជ័យ')
     router.push(`/orders/${res.data.reference}`)
   } catch (e) {
     setFromError(e)
-    const message = e.message || 'មិនអាចដាក់ការបញ្ជាទិញបានទេ'
     if (Object.keys(e.fieldErrors || {}).length === 0) {
-      checkoutError.value = message
-    }
-    // The confirmation modal (where checkoutError normally displays) is
-    // already closed by the time this runs for a Bakong payment — payment
-    // already succeeded via the scan modal at that point, so a toast is
-    // the only way the customer would actually see this failure. Harmless
-    // duplicate for the cash path, where the modal is still open too.
-    if (bakongModalOpen.value) {
-      showToast(message)
-      bakongModalOpen.value = false
+      checkoutError.value = e.message || 'មិនអាចដាក់ការបញ្ជាទិញបានទេ'
     }
   } finally {
     checkingOut.value = false
   }
 }
 
-// --- Order history ---
+// --- Order history — paginated, with infinite scroll loading further
+// pages as the sentinel element scrolls into view. ---
 const orders = ref([])
 const loadingOrders = ref(false)
+const loadingMoreOrders = ref(false)
+const ordersPage = ref(1)
+const ordersHasMore = ref(true)
+const ordersSentinel = ref(null)
 let ordersLoaded = false
+let ordersObserver = null
 
 async function onOpenHistory() {
   tab.value = 'history'
   if (ordersLoaded) return
   loadingOrders.value = true
   try {
-    const res = await listOrders()
+    const res = await listOrders({ page: 1, pageSize: 10 })
     orders.value = res.data || []
+    ordersPage.value = 1
+    ordersHasMore.value = res.meta ? res.meta.page < res.meta.totalPage : false
     ordersLoaded = true
+    await nextTick()
+    setupOrdersObserver()
   } catch (e) {
     showToast(e.message || 'មិនអាចទាញយកប្រវត្តិការបញ្ជាទិញបានទេ')
   } finally {
     loadingOrders.value = false
   }
 }
+
+// IntersectionObserver on the sentinel div — fires loadMoreOrders() once
+// it scrolls into view, rather than a raw window scroll listener firing
+// on every pixel scrolled. Watches ordersSentinel directly since it only
+// exists in the DOM once the history tab is open and has results.
+function setupOrdersObserver() {
+  if (ordersObserver) ordersObserver.disconnect()
+  if (!ordersSentinel.value) return
+  ordersObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMoreOrders()
+  })
+  ordersObserver.observe(ordersSentinel.value)
+}
+
+async function loadMoreOrders() {
+  if (loadingMoreOrders.value || !ordersHasMore.value) return
+  loadingMoreOrders.value = true
+  try {
+    const nextPage = ordersPage.value + 1
+    const res = await listOrders({ page: nextPage, pageSize: 10 })
+    orders.value = [...orders.value, ...(res.data || [])]
+    ordersPage.value = nextPage
+    ordersHasMore.value = res.meta ? res.meta.page < res.meta.totalPage : false
+    // Re-observe the sentinel — it moved further down the DOM now that
+    // more results were appended above it, but the observer still needs
+    // to watch the same element reference for the NEXT page too.
+    await nextTick()
+    setupOrdersObserver()
+  } catch (e) {
+    showToast(e.message || 'មិនអាចទាញយកទំព័របន្ថែមបានទេ')
+  } finally {
+    loadingMoreOrders.value = false
+  }
+}
+
+onBeforeUnmount(() => {
+  if (ordersObserver) ordersObserver.disconnect()
+})
 
 function formatDate(iso) {
   if (!iso) return ''

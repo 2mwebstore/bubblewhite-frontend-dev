@@ -23,18 +23,12 @@ export function useAdminOrders() {
     return api.patch(`/admin/orders/${id}/status`, { status })
   }
 
-  // Re-checks a Bakong order's payment status against Bakong's real API —
-  // for when a customer says they paid but the order still shows unpaid.
+  // Re-checks a PPCBank order's payment status against PPCBank's real
+  // API — for when a customer says they paid but the order still shows
+  // unpaid.
   function verifyPayment(id) {
     return api.post(`/admin/orders/${id}/verify-payment`, {})
   }
 
-  // Full Bakong transaction detail (tracking status, receiver bank,
-  // sender account) via check_transaction_by_hash — richer than the
-  // pass/fail verifyPayment above, for actually investigating a payment.
-  function getTransactionDetail(id) {
-    return api.get(`/admin/orders/${id}/transaction-detail`)
-  }
-
-  return { listOrders, getOrder, updateOrderStatus, verifyPayment, getTransactionDetail }
+  return { listOrders, getOrder, updateOrderStatus, verifyPayment }
 }

@@ -72,6 +72,15 @@
         </div>
       </div>
 
+      <div class="border-t border-line pt-6">
+        <p class="text-sm font-semibold mb-1">ថ្លៃដឹកជញ្ជូន</p>
+        <p class="text-xs text-muted mb-3">ចំនួនទឹកប្រាក់ថេរដែលបន្ថែមទៅលើសរុបការបញ្ជាទិញរបស់អតិថិជននីមួយៗ។</p>
+        <div class="max-w-xs">
+          <label class="text-xs font-medium block mb-1">ថ្លៃដឹកជញ្ជូន ($)</label>
+          <input v-model.number="form.shippingFee" type="number" min="0" step="0.25" class="input-field text-sm" />
+        </div>
+      </div>
+
       <div>
         <p class="text-xs font-medium mb-2">បណ្តាញសង្គម</p>
         <div class="grid sm:grid-cols-2 gap-4">
@@ -128,6 +137,7 @@ const form = reactive({
   facebookUrl: '', instagramUrl: '', tiktokUrl: '', telegramUrl: '',
   logoUrl: '',
   latitude: 0, longitude: 0, deliveryDistanceKm: 0,
+  shippingFee: 0,
 })
 
 // Phnom Penh center — used only when no location has been saved yet

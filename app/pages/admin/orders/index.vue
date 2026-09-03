@@ -89,6 +89,7 @@ definePageMeta({ layout: 'admin', permission: 'order.view' })
 
 import { ref, computed, watch, onMounted } from 'vue'
 import { useAdminOrders } from '~/composables/useAdminOrders'
+import { useAdminPaymentMethods } from '~/composables/useAdminPaymentMethods'
 import { useAuth } from '~/composables/useAuth'
 import { useStore } from '~/composables/useStore'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
@@ -109,6 +110,13 @@ const statusFilter = ref('')
 const paymentFilter = ref('')
 const pageSize = ref(10)
 
+// Admin list — fetches ALL payment methods regardless of enabled status
+// (unlike the storefront's public list), since an admin filtering orders
+// needs to find historical orders placed with a method that's since been
+// disabled, not just currently-active ones.
+const { listPaymentMethods } = useAdminPaymentMethods()
+const paymentMethodList = ref([])
+
 const statusOptions = [
   { value: 'pending', label: 'កំពុងរង់ចាំ' },
   { value: 'confirmed', label: 'បានបញ្ជាក់' },
@@ -117,11 +125,16 @@ const statusOptions = [
   { value: 'cancelled', label: 'បានលុបចោល' },
 ]
 const filterStatusOptions = [{ value: '', label: 'ស្ថានភាពទាំងអស់' }, ...statusOptions]
-const filterPaymentOptions = [
+// Dynamic — built from the real, admin-managed payment methods table
+// (see /admin/payment_method) instead of a hardcoded list, so this never
+// silently falls out of sync with whatever payment methods actually
+// exist (this used to hardcode only cash/bakong, missing PPCBank entirely
+// once it was added, and would have kept listing bakong even after that
+// integration was removed).
+const filterPaymentOptions = computed(() => [
   { value: '', label: 'ការទូទាត់ទាំងអស់' },
-  { value: 'cash', label: 'សាច់ប្រាក់' },
-  { value: 'bakong', label: 'Bakong KHQR' },
-]
+  ...paymentMethodList.value.map((pm) => ({ value: pm.code, label: pm.name })),
+])
 const pageSizeOptions = [
   { value: 10, label: '10 / ទំព័រ' },
   { value: 20, label: '20 / ទំព័រ' },
@@ -177,7 +190,12 @@ function resetFilters() {
   paymentFilter.value = ''
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  listPaymentMethods({ page: 1, pageSize: 50 })
+    .then((res) => { paymentMethodList.value = res.data || [] })
+    .catch(() => {})
+})
 
 const savingStatusFor = ref(null)
 async function onStatusChange(order, newStatus) {

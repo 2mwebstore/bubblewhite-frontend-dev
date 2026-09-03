@@ -11,7 +11,37 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'km' },
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+         // Favicon
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/favicon.png',
+        },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '32x32',
+          href: '/icon/32x32.png',
+        },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          href: '/icon/192x192.png',
+        },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '512x512',
+          href: '/icon/512x512.png',
+        },
+
+        // Apple / Mobile Icon
+        {
+          rel: 'apple-touch-icon',
+          sizes: '180x180',
+          href: '/icon/180x180.png',
+        },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
@@ -41,18 +71,6 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // All Bakong-related config (merchant credentials, Open API
-    // credentials) is intentionally NOT listed here — it's read directly
-    // from process.env inside the actual request handlers instead (see
-    // server/api/khqr.post.js and server/utils/bakongToken.js). Routing
-    // custom-named env vars through Nuxt's runtimeConfig only works
-    // reliably at RUNTIME if the var name matches Nuxt's own
-    // NUXT_<SCREAMING_SNAKE_KEY> convention; anything else gets evaluated
-    // once during the build step and silently frozen at that value
-    // thereafter, ignoring the same env var if it's only set at deploy/
-    // runtime (the normal pattern on Railway and most container hosts).
-    // See BAKONG_* entries in .env.example for the full list of variables.
-
     public: {
       // Same env var name Vite used before, so existing .env files/deploy
       // configs mostly carry over — Nuxt just needs the NUXT_PUBLIC_ prefix

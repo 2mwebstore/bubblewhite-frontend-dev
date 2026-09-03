@@ -1,19 +1,16 @@
 import { useCustomerApi } from './useCustomerApi'
 
-// Checkout no longer just trusts the customer's stated payment intent for
-// Bakong — the backend independently re-verifies against Bakong's real API
-// using paymentReference before the order is created (see
-// OrderService.Checkout in the Go backend). Cash orders still land as
-// "pending, unpaid" for the business to confirm and fulfill manually, same
-// as before.
+// Checkout is cash-only now (Bakong's integration was removed). Cash
+// orders land as "pending, unpaid" for the business to confirm and
+// fulfill manually.
 export function useOrders() {
   const api = useCustomerApi()
 
-  function checkout(paymentMethod, address, phone, paymentReference = '') {
-    return api.post('/customer/orders', { paymentMethod, address, phone, paymentReference })
+  function checkout(paymentMethod, address, phone) {
+    return api.post('/customer/orders', { paymentMethod, address, phone })
   }
 
-  // PPCBank's flow is fundamentally different from Bakong/cash — the
+  // PPCBank's flow is fundamentally different from cash — the
   // customer LEAVES this site to pay on PPCBank's hosted page, so the
   // order has to exist (as pending/unpaid) BEFORE redirecting, unlike
   // Checkout() above which only creates the order after payment is
@@ -31,8 +28,9 @@ export function useOrders() {
     return api.get(`/customer/orders/ppcbank/status?billNumber=${encodeURIComponent(billNumber)}`)
   }
 
-  function listOrders() {
-    return api.get('/customer/orders')
+  function listOrders({ page = 1, pageSize = 10 } = {}) {
+    const q = new URLSearchParams({ page, pageSize })
+    return api.get(`/customer/orders?${q.toString()}`)
   }
 
   function getOrder(id) {
