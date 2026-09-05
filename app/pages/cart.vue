@@ -90,6 +90,7 @@
               :clearable="false"
               :searchable="false"
             />
+            <FieldError :message="fieldErrors.payment" />
             <p v-if="paymentMethod" class="text-xs text-muted mt-3">
               {{ paymentMethod === 'ppcbank'
                 ? 'អ្នកនឹងត្រូវបានបញ្ជូនទៅកាន់គេហទំព័រ PPCBank ដើម្បីបញ្ចប់ការទូទាត់។'
@@ -127,7 +128,7 @@
             </div>
           </div>
 
-          <button type="button" class="btn-primary w-full" :disabled="(paymentMethodList && !paymentOptions.length) || !paymentMethod" @click="onOpenConfirm">
+          <button type="button" class="btn-primary w-full" :disabled="paymentMethodList && !paymentOptions.length" @click="onOpenConfirm">
             ដាក់ការបញ្ជាទិញ →
           </button>
         </div>
@@ -374,6 +375,7 @@ async function onRemove(item) {
 function onOpenConfirm() {
   clearFieldError()
   const errors = {}
+  if (!paymentMethod.value) errors.payment = 'សូមជ្រើសរើសវិធីទូទាត់'
   if (!phone.value.trim()) errors.phone = 'សូមបញ្ចូលលេខទូរស័ព្ទ'
   if (!address.value.trim()) errors.address = 'សូមបញ្ចូលអាសយដ្ឋានដឹកជញ្ជូន'
   if (Object.keys(errors).length) {
