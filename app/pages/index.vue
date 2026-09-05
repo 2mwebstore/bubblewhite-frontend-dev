@@ -1,7 +1,12 @@
 <template>
   <div>
-    <!-- Hero -->
-    <section v-if="heroSlides.length" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
+    <!-- Hero — skeleton shown only while genuinely pending with no data
+         yet (e.g. a client-side refetch); the normal SSR-awaited first
+         load already has real data by the time this ever renders. -->
+    <section v-if="pending && !data" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
+      <div class="w-full aspect-[21/9] skeleton-shimmer rounded-card" />
+    </section>
+    <section v-else-if="heroSlides.length" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
       <div class="w-full card-surface overflow-hidden relative hero-swiper">
         <Swiper
           :modules="[Autoplay, Pagination]"
@@ -12,12 +17,12 @@
         >
           <SwiperSlide v-for="(slide, i) in heroSlides" :key="slide.id">
             <component :is="slide.linkUrl ? 'a' : 'div'" :href="slide.linkUrl || undefined" class="block w-full h-full">
-              <img
+              <SkeletonImage
                 :src="slide.imageUrl"
                 :alt="slide.alt"
-                class="w-full h-full object-cover"
-                :loading="i === 0 ? 'eager' : 'lazy'"
-                :fetchpriority="i === 0 ? 'high' : undefined"
+                wrapper-class="w-full h-full"
+                img-class="w-full h-full object-cover"
+                :eager="i === 0"
               />
             </component>
           </SwiperSlide>
@@ -28,8 +33,19 @@
     <!-- Category strip — auto-sliding + looping via Swiper, so it stays
          fully swipeable/draggable (a pure CSS marquee can't support touch
          at all, which is why the previous version couldn't be swiped). -->
+    <section v-if="pending && !data" class="py-6 border-y border-line">
+      <div class="max-w-7xl mx-auto px-6 flex gap-6 overflow-hidden">
+        <div v-for="n in 6" :key="n" class="flex items-center gap-3 shrink-0 !w-56">
+          <div class="w-14 h-14 rounded-full skeleton-shimmer shrink-0" />
+          <div class="flex-1 space-y-2">
+            <div class="h-3 w-24 skeleton-shimmer rounded" />
+            <div class="h-2.5 w-14 skeleton-shimmer rounded" />
+          </div>
+        </div>
+      </div>
+    </section>
     <section
-        v-if="categoriesWithProducts.length"
+        v-else-if="categoriesWithProducts.length"
         class="py-6 border-y border-line category-swiper"
       >
         <Swiper
@@ -41,7 +57,7 @@
           :autoplay="{ delay: 2200, disableOnInteraction: false, pauseOnMouseEnter: true }"
           :speed="900"
           grab-cursor
-          class="max-w-7xl mx-auto px-6"
+          class="max-w-7xl mx-auto px-6 !pt-[6px] !pb-[6px]"
         >
           <SwiperSlide v-for="cat in categoriesWithProducts" :key="cat.id" class="!w-56">
             <NuxtLink
@@ -51,13 +67,13 @@
               <div
                 class="w-14 h-14 rounded-full bg-cream-dark overflow-hidden shrink-0 group-hover:ring-2 group-hover:ring-ink transition-all"
               >
-                <img
+                <SkeletonImage
                   v-if="cat.image"
                   :src="cat.image"
                   :alt="cat.name"
-                  class="w-full h-full object-cover"
-                  style="object-position: 50% 35%"
-                  loading="lazy"
+                  wrapper-class="w-full h-full"
+                  img-class="w-full h-full object-cover"
+                  object-position="50% 35%"
                 />
               </div>
 
@@ -76,7 +92,19 @@
       </section>
 
     <!-- Featured -->
-    <section v-if="featured.length" class="max-w-7xl mx-auto px-6 pb-6 pt-6">
+    <section v-if="pending && !data" class="max-w-7xl mx-auto px-6 pb-6 pt-6">
+      <div class="flex items-end justify-between mb-8">
+        <div class="h-7 w-40 skeleton-shimmer rounded" />
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div v-for="n in 5" :key="n">
+          <div class="aspect-[3/4] skeleton-shimmer rounded-card mb-3" />
+          <div class="h-3.5 w-3/4 skeleton-shimmer rounded mb-2" />
+          <div class="h-3.5 w-1/3 skeleton-shimmer rounded" />
+        </div>
+      </div>
+    </section>
+    <section v-else-if="featured.length" class="max-w-7xl mx-auto px-6 pb-6 pt-6">
       <div class="flex items-end justify-between mb-8" data-aos="zoom-in">
         <h2 class="font-sans font-bold text-2xl">ផលិតផលពិសេស</h2>
         <NuxtLink to="/shop" class="text-sm font-medium text-rust hover:underline">មើលទាំងអស់ →</NuxtLink>
@@ -94,7 +122,14 @@
         <h2 class="font-sans font-bold text-2xl">លក់ដាច់ជាងគេ</h2>
         <NuxtLink to="/shop" class="text-sm font-medium text-rust hover:underline">មើលទាំងអស់ →</NuxtLink>
       </div>
-      <p v-if="loadError" class="text-sm text-muted">មិនអាចទាញយកផលិតផលបានទេ។ សូមព្យាយាមម្តងទៀត។</p>
+      <div v-if="pending && !data" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div v-for="n in 5" :key="n">
+          <div class="aspect-[3/4] skeleton-shimmer rounded-card mb-3" />
+          <div class="h-3.5 w-3/4 skeleton-shimmer rounded mb-2" />
+          <div class="h-3.5 w-1/3 skeleton-shimmer rounded" />
+        </div>
+      </div>
+      <p v-else-if="loadError" class="text-sm text-muted">មិនអាចទាញយកផលិតផលបានទេ។ សូមព្យាយាមម្តងទៀត។</p>
       <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div v-for="(p, i) in bestSelling" :key="p.id" data-aos="zoom-in" :data-aos-delay="(i % 5) * 80">
           <ProductCard :product="p" />
@@ -135,7 +170,7 @@ const { fetchCategories, fetchFeatured, fetchProducts, fetchBanners } = useCatal
 // (and gets serialized into the page payload for hydration), so the
 // rendered HTML search engines/link-preview bots see already contains real
 // product data — not an empty shell waiting for client JS to fill it in.
-const { data, error } = await useAsyncData('home', async () => {
+const { data, error, pending } = await useAsyncData('home', async () => {
   const [cats, feat, banners, productsRes] = await Promise.all([
     fetchCategories(),
     fetchFeatured(10),
@@ -159,7 +194,7 @@ const features = [
   { title: 'ជំនួយ ២៤/៧', desc: 'យើងនៅទីនេះដើម្បីជួយ', icon: Headset },
 ]
 
-const title = 'ផ្តល់ជូន​អតិថិជន​នូវ​សម្លៀកបំពាក់​គុណ​ភាព​ខ្ពស់​និងទាន់​សម័យ | BubbleWhite'
+const title = 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា | BubbleWhite'
 const description = 'ទិញទំនិញ BubbleWhite — សម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ និងសុខស្រួល ផលិតនៅភ្នំពេញ។ អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ រចនាឡើងសម្រាប់ភាពសាមញ្ញ និងទំនុកចិត្ត។'
 
 useSeoMeta({

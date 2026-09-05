@@ -16,15 +16,15 @@
             aria-label="Open full image preview"
             @click="openLightbox(activeIndex)"
           >
-            <img
+            <SkeletonImage
               :src="activeImage"
               :alt="product.name"
-              class="w-full h-full object-cover"
-              style="object-position: 65% center"
-              width="520"
-              height="472"
-              loading="eager"
-              fetchpriority="high"
+              wrapper-class="w-full h-full"
+              img-class="w-full h-full object-cover"
+              object-position="65% center"
+              :width="520"
+              :height="472"
+              eager
             />
           </button>
           <ProductGlyph v-else :seed="product.id" class="w-1/2 h-1/2" />
@@ -47,7 +47,13 @@
             :aria-label="`Show image ${i + 1} of ${images.length}`"
             @click="activeIndex = i"
           >
-            <img :src="img" :alt="`${product.name} thumbnail ${i + 1}`" class="w-full h-full object-cover" style="object-position: 65% center" loading="lazy" />
+            <SkeletonImage
+              :src="img"
+              :alt="`${product.name} thumbnail ${i + 1}`"
+              wrapper-class="w-full aspect-[3/4] rounded-2xl"
+              img-class="w-full h-full object-cover"
+              object-position="65% center"
+            />
           </button>
         </div>
       </div>

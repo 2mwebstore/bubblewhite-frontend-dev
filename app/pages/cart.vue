@@ -154,7 +154,7 @@
           >
             <div>
               <p class="font-medium">{{ order.reference }}</p>
-              <p class="text-xs text-muted">{{ formatDate(order.createdAt) }} · {{ paymentLabel(order.paymentMethod) }}</p>
+              <p class="text-xs text-muted">{{ formatOrderDate(order.createdAt) }} · {{ paymentLabel(order.paymentMethod) }}</p>
             </div>
             <div class="text-right">
               <p class="font-sans font-bold">${{ order.total.toFixed(2) }}</p>
@@ -251,10 +251,11 @@ import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useStore } from '~/composables/useStore'
 import { useFieldErrors } from '~/composables/useFieldErrors'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { paymentLabel, statusLabel, statusClass, formatOrderDate } from '~/composables/useOrderDisplay'
 import { usePaymentMethods } from '~/composables/usePaymentMethods'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
 
-useSeoMeta({ title: 'រទេះទំនិញ | Bubble White' })
+useSeoMeta({ title: 'រទេះទំនិញ | BubbleWhite' })
 
 const router = useRouter()
 const route = useRoute()
@@ -510,39 +511,6 @@ async function loadMoreOrders() {
 onBeforeUnmount(() => {
   if (ordersObserver) ordersObserver.disconnect()
 })
-
-function formatDate(iso) {
-  if (!iso) return ''
-  return new Date(iso).toLocaleDateString('km-KH', { year: 'numeric', month: 'short', day: 'numeric' })
-}
-
-function paymentLabel(method) {
-  if (method === 'bakong') return 'Bakong KHQR'
-  if (method === 'ppcbank') return 'PPCBank KHQR'
-  return 'សាច់ប្រាក់'
-}
-
-const STATUS_LABELS = {
-  pending: 'កំពុងរង់ចាំ',
-  confirmed: 'បានបញ្ជាក់',
-  shipped: 'កំពុងដឹកជញ្ជូន',
-  completed: 'បានបញ្ចប់',
-  cancelled: 'បានលុបចោល',
-}
-function statusLabel(status) {
-  return STATUS_LABELS[status] || status
-}
-
-const STATUS_CLASSES = {
-  pending: 'bg-amber-100 text-amber-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  shipped: 'bg-blue-100 text-blue-700',
-  completed: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-}
-function statusClass(status) {
-  return STATUS_CLASSES[status] || 'bg-cream-dark text-muted'
-}
 </script>
 
 <style scoped>

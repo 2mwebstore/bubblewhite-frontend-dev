@@ -34,6 +34,72 @@ body {
   @apply bg-white/70 border border-line rounded-card;
 }
 
+/* Shared shimmer effect for skeleton loading placeholders (SkeletonImage,
+   plus the inline skeleton blocks on the home page) — a diagonal light
+   sweep over the base cream-dark color, rather than a plain opacity
+   pulse. Respects prefers-reduced-motion via the existing global rule
+   below, since it's just a regular CSS animation like any other. */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: #F2EEE8;
+}
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.6) 50%, transparent 80%);
+  animation: skeleton-shimmer-sweep 1.6s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Small centered "pearl" bubble shown inside SkeletonImage's shimmer
+   background — echoes the same pearl-bubble look used in the brand's
+   loading moments elsewhere, rather than a plain flat placeholder.
+   Percentage-based size (with min/max clamps) so it scales sensibly
+   whether it's sitting inside a tiny 32px filter icon or a full-size
+   product gallery image. */
+.skeleton-pearl {
+  width: 26%;
+  height: 26%;
+  min-width: 10px;
+  min-height: 10px;
+  max-width: 46px;
+  max-height: 46px;
+  border-radius: 50%;
+  position: relative;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.55) 22%, rgba(255,255,255,0.05) 45%, rgba(210,200,188,0.12) 100%);
+  box-shadow:
+    inset -3px -3px 8px rgba(120,105,90,0.10),
+    inset 2px 2px 5px rgba(255,255,255,0.9),
+    0 8px 14px -6px rgba(80,70,60,0.16);
+  animation: skeleton-pearl-float 2.6s ease-in-out infinite;
+}
+.skeleton-pearl::before {
+  /* small secondary highlight — same trick used on the bubble-bath
+     loading screen, gives the placeholder a soft "pearl" quality
+     instead of reading as a flat gray dot. */
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 22%;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  filter: blur(0.5px);
+}
+@keyframes skeleton-pearl-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.92; }
+  50%      { transform: translateY(-14%) scale(1.05); opacity: 1; }
+}
+
 /* visible keyboard focus */
 /* a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 2px solid theme('colors.rust');

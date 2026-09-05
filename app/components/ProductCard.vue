@@ -7,15 +7,15 @@
       >{{ product.badge }}</span>
 
       <div class="aspect-[3/4] bg-cream-dark flex items-center justify-center overflow-hidden">
-        <img
+        <SkeletonImage
           v-if="thumbnail"
           :src="thumbnail"
           :alt="product.name"
-          class="w-full h-full object-cover"
-          style="object-position: 65% center"
-          loading="lazy"
-          width="520"
-          height="472"
+          wrapper-class="w-full h-full"
+          img-class="w-full h-full object-cover"
+          object-position="65% center"
+          :width="520"
+          :height="472"
         />
         <ProductGlyph v-else :seed="product.id" />
       </div>

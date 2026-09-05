@@ -72,6 +72,14 @@ import { ref, onMounted } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import { useOrders } from '~/composables/useOrders'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
+import {
+  paymentLabel,
+  paymentStatusLabel,
+  paymentStatusClass,
+  statusLabel,
+  statusClass,
+  formatOrderDateTime as formatDate,
+} from '~/composables/useOrderDisplay'
 
 useSeoMeta({ title: 'ព័ត៌មានលម្អិតការបញ្ជាទិញ | BubbleWhite' })
 
@@ -127,51 +135,5 @@ onMounted(async () => {
 function parseOrderIdParam(param) {
   const match = String(param).match(/^BW-(\d+)$/i)
   return match ? String(Number(match[1])) : param
-}
-
-function formatDate(iso) {
-  if (!iso) return ''
-  return new Date(iso).toLocaleDateString('km-KH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
-
-function paymentLabel(method) {
-  if (method === 'bakong') return 'Bakong KHQR'
-  if (method === 'ppcbank') return 'PPCBank KHQR'
-  return 'សាច់ប្រាក់'
-}
-
-const PAYMENT_STATUS_LABELS = { unpaid: 'មិនទាន់ទូទាត់', paid: 'បានទូទាត់', failed: 'បរាជ័យ' }
-function paymentStatusLabel(status) {
-  return PAYMENT_STATUS_LABELS[status] || status
-}
-const PAYMENT_STATUS_CLASSES = {
-  unpaid: 'bg-amber-100 text-amber-700',
-  paid: 'bg-green-100 text-green-700',
-  failed: 'bg-red-100 text-red-700',
-}
-function paymentStatusClass(status) {
-  return PAYMENT_STATUS_CLASSES[status] || 'bg-cream-dark text-muted'
-}
-
-const STATUS_LABELS = {
-  pending: 'កំពុងរង់ចាំ',
-  confirmed: 'បានបញ្ជាក់',
-  shipped: 'កំពុងដឹកជញ្ជូន',
-  completed: 'បានបញ្ចប់',
-  cancelled: 'បានលុបចោល',
-}
-function statusLabel(status) {
-  return STATUS_LABELS[status] || status
-}
-
-const STATUS_CLASSES = {
-  pending: 'bg-amber-100 text-amber-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  shipped: 'bg-blue-100 text-blue-700',
-  completed: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-}
-function statusClass(status) {
-  return STATUS_CLASSES[status] || 'bg-cream-dark text-muted'
 }
 </script>

@@ -53,7 +53,14 @@
                   @click="filters.category = cat.slug"
                 >
                   <span class="w-8 h-8 rounded-full bg-cream-dark overflow-hidden shrink-0">
-                    <img v-if="cat.image" :src="cat.image" :alt="cat.name" class="w-full h-full object-cover" style="object-position: 50% 35%" loading="lazy" />
+                    <SkeletonImage
+                      v-if="cat.image"
+                      :src="cat.image"
+                      :alt="cat.name"
+                      wrapper-class="w-full h-full"
+                      img-class="w-full h-full object-cover"
+                      object-position="50% 35%"
+                    />
                   </span>
                   {{ cat.name }}
                 </button>

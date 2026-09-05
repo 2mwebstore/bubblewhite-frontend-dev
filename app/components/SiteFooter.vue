@@ -2,8 +2,8 @@
   <footer class="bg-ink text-cream mt-24 pb-16 md:pb-0">
     <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-5 gap-10">
       <div class="col-span-2">
-        <p class="font-sans font-extrabold text-lg mb-3">{{ settings?.companyName || 'BubbleWhite' }}</p>
-        <p class="text-sm text-cream/60 leading-relaxed max-w-xs">{{settings?.companyDetail || 'ផ្តល់ជូន​អតិថិជន​នូវ​សម្លៀកបំពាក់​គុណ​ភាព​ខ្ពស់​និងទាន់​សម័យ។<br />សូមអរគុណដែលបានគាំទ្រ BubbleWhite។'}}</p>
+        <p class="font-sans font-extrabold text-lg mb-3">{{ settings?.companyName || 'bubble.white' }}</p>
+        <p class="text-sm text-cream/60 leading-relaxed max-w-xs">{{ settings?.companyDetail || 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា។' }}<br />សូមអរគុណដែលបានគាំទ្រ BubbleWhite។</p>
         <div class="flex items-center gap-3 mt-5">
           <a v-for="s in socialLinks" :key="s.label" :href="s.href" target="_blank" rel="noopener" :aria-label="s.label" class="w-8 h-8 rounded-full border border-cream/25 flex items-center justify-center hover:border-cream transition-colors">
             <component :is="s.icon" v-if="s.icon" :size="14" :stroke-width="1.6" />
@@ -35,8 +35,8 @@
         <p class="text-xs tracking-widest uppercase font-semibold mb-4 text-cream/70">ទំនាក់ទំនង</p>
         <ul class="space-y-2 text-sm text-cream/60">
           <li>{{ settings?.contactAddress || 'ភ្នំពេញ, កម្ពុជា' }}</li>
-          <li>{{ settings?.contactEmail || 'info@bubblewhite.co' }}</li>
-          <li>{{ settings?.contactPhone || '+855 86 677 913' }}</li>
+          <li>{{ settings?.contactEmail || 'hello@bubblewhite.co' }}</li>
+          <li>{{ settings?.contactPhone || '+855 12 345 678' }}</li>
           <li>{{ settings?.workingHours || 'ចន្ទ – អាទិត្យ / ៩ព្រឹក – ៩យប់' }}</li>
         </ul>
       </div>

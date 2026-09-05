@@ -89,6 +89,7 @@ definePageMeta({ layout: 'admin', permission: 'order.view' })
 
 import { ref, computed, watch, onMounted } from 'vue'
 import { useAdminOrders } from '~/composables/useAdminOrders'
+import { paymentLabel, paymentStatusLabel, paymentStatusClass, formatOrderDateTime as formatDateTime } from '~/composables/useOrderDisplay'
 import { useAdminPaymentMethods } from '~/composables/useAdminPaymentMethods'
 import { useAuth } from '~/composables/useAuth'
 import { useStore } from '~/composables/useStore'
@@ -211,29 +212,5 @@ async function onStatusChange(order, newStatus) {
   } finally {
     savingStatusFor.value = null
   }
-}
-
-function formatDateTime(iso) {
-  if (!iso) return ''
-  return new Date(iso).toLocaleDateString('km-KH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
-
-function paymentLabel(method) {
-  if (method === 'bakong') return 'Bakong KHQR'
-  if (method === 'ppcbank') return 'PPCBank KHQR'
-  return 'សាច់ប្រាក់'
-}
-
-const PAYMENT_STATUS_LABELS = { unpaid: 'មិនទាន់ទូទាត់', paid: 'បានទូទាត់', failed: 'បរាជ័យ' }
-function paymentStatusLabel(status) {
-  return PAYMENT_STATUS_LABELS[status] || status
-}
-const PAYMENT_STATUS_CLASSES = {
-  unpaid: 'bg-amber-100 text-amber-700',
-  paid: 'bg-green-100 text-green-700',
-  failed: 'bg-red-100 text-red-700',
-}
-function paymentStatusClass(status) {
-  return PAYMENT_STATUS_CLASSES[status] || 'bg-cream-dark text-muted'
 }
 </script>
