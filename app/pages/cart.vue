@@ -78,7 +78,7 @@
 
           <!-- Payment method -->
           <div class="card-surface p-4">
-            <FormLabel text="របៀបទូទាត់" for-id="checkout-payment" />
+            <FormLabel text="របៀបទូទាត់" required for-id="checkout-payment" />
             <p v-if="paymentMethodList && !paymentOptions.length" class="text-sm text-red-600">
               សុំទោស មិនមានវិធីទូទាត់ណាមួយអាចប្រើប្រាស់បានទេនាពេលនេះ សូមទាក់ទងមកយើង។
             </p>
