@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-sm mx-auto px-6 py-16 md:py-24">
     <h1 class="font-sans font-bold text-2xl mb-1 text-center">ចូលគណនី</h1>
-    <p class="text-sm text-muted text-center mb-8">សូមស្វាគមន៍មកកាន់ Bubble White វិញ</p>
+    <p class="text-sm text-muted text-center mb-8">សូមស្វាគមន៍មកកាន់ BubbleWhite វិញ</p>
 
     <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
       <div>
@@ -52,7 +52,7 @@ import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
 
-useSeoMeta({ title: 'ចូលគណនី | Bubble White' })
+useSeoMeta({ title: 'ចូលគណនី | BubbleWhite' })
 
 const route = useRoute()
 const router = useRouter()

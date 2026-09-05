@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 class="font-sans font-bold text-2xl mb-1">សួស្តី, {{ state.user?.name }} 👋</h1>
-    <p class="text-sm text-muted mb-8">នេះជាទិដ្ឋភាពរួមនៃហាង Bubble White របស់អ្នក។</p>
+    <p class="text-sm text-muted mb-8">នេះជាទិដ្ឋភាពរួមនៃហាង BubbleWhite របស់អ្នក។</p>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
       <div class="card-surface p-5">

@@ -73,7 +73,7 @@ import { ChevronLeft } from 'lucide-vue-next'
 import { useOrders } from '~/composables/useOrders'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 
-useSeoMeta({ title: 'ព័ត៌មានលម្អិតការបញ្ជាទិញ | Bubble White' })
+useSeoMeta({ title: 'ព័ត៌មានលម្អិតការបញ្ជាទិញ | BubbleWhite' })
 
 const route = useRoute()
 const router = useRouter()

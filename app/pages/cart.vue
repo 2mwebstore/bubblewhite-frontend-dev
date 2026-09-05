@@ -86,10 +86,11 @@
               v-else
               v-model="paymentMethod"
               :options="paymentOptions"
+              placeholder="សូមជ្រើសរើសវិធីទូទាត់"
               :clearable="false"
               :searchable="false"
             />
-            <p class="text-xs text-muted mt-3">
+            <p v-if="paymentMethod" class="text-xs text-muted mt-3">
               {{ paymentMethod === 'ppcbank'
                 ? 'អ្នកនឹងត្រូវបានបញ្ជូនទៅកាន់គេហទំព័រ PPCBank ដើម្បីបញ្ចប់ការទូទាត់។'
                 : 'ទូទាត់ជាសាច់ប្រាក់នៅពេលទទួលទំនិញ ឬមកយកដោយផ្ទាល់។' }}
@@ -126,7 +127,7 @@
             </div>
           </div>
 
-          <button type="button" class="btn-primary w-full" :disabled="paymentMethodList && !paymentOptions.length" @click="onOpenConfirm">
+          <button type="button" class="btn-primary w-full" :disabled="(paymentMethodList && !paymentOptions.length) || !paymentMethod" @click="onOpenConfirm">
             ដាក់ការបញ្ជាទិញ →
           </button>
         </div>
@@ -281,23 +282,20 @@ const FALLBACK_ICONS = { ppcbank: Landmark, cash: Banknote }
 const { methods: paymentMethodList, ensureLoaded: ensurePaymentMethodsLoaded } = usePaymentMethods()
 const paymentOptions = computed(() => {
   const list = paymentMethodList.value
-  // While the list hasn't loaded yet, fall back to both via generic
-  // icons rather than an empty list — avoids a flash of "no payment
-  // methods available" on first render; the backend check is still
-  // authoritative regardless.
-  if (!list) {
-    return [
-      { value: 'ppcbank', label: 'PPCBank KHQR', icon: Landmark },
-      { value: 'cash', label: 'សាច់ប្រាក់', icon: Banknote },
-    ]
-  }
+  // No static fallback — while the real list hasn't loaded yet (or if
+  // the fetch fails), this is genuinely empty rather than showing
+  // hardcoded options that might not reflect what's actually enabled.
+  if (!list) return []
   return list.map((pm) => ({
     value: pm.code,
     label: pm.name,
     icon: pm.imageUrl || FALLBACK_ICONS[pm.code],
   }))
 })
-const paymentMethod = ref('cash')
+// Empty by default — the customer must explicitly choose a payment
+// method (see the SearchableSelect's placeholder below), rather than one
+// being silently pre-selected for them.
+const paymentMethod = ref('')
 const address = ref('')
 // Defaults to the customer's account phone, but stays fully editable per
 // order — e.g. ordering for delivery to someone else's number.
@@ -343,23 +341,13 @@ onMounted(async () => {
   ensureSiteSettingsLoaded()
 })
 
-// If the currently-selected method becomes unavailable once settings load
-// (e.g. defaulted to a method an admin has since disabled), fall back to
-// whatever's actually offered rather than leaving a dead selection.
-// Sets the default selection to whichever payment method is marked
-// primary (see /admin/payment_method) the first time the real list loads
-// — replaces a hardcoded default. Falls back to the first available
-// option if none is marked primary (shouldn't normally happen — the seed
-// always marks one).
-watch(paymentMethodList, (list) => {
-  if (!list || !list.length) return
-  const primary = list.find((pm) => pm.isPrimary)
-  paymentMethod.value = (primary || list[0]).code
-})
-
+// If the currently-selected method becomes unavailable (e.g. an admin
+// disables it while the customer is mid-checkout), reset to empty rather
+// than silently auto-picking a different one — the customer should
+// always be the one to explicitly choose, never have it chosen for them.
 watch(paymentOptions, (opts) => {
-  if (opts.length && !opts.some((o) => o.value === paymentMethod.value)) {
-    paymentMethod.value = opts[0].value
+  if (paymentMethod.value && !opts.some((o) => o.value === paymentMethod.value)) {
+    paymentMethod.value = ''
   }
 })
 

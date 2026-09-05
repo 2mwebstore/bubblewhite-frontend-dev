@@ -159,8 +159,8 @@ const features = [
   { title: 'ជំនួយ ២៤/៧', desc: 'យើងនៅទីនេះដើម្បីជួយ', icon: Headset },
 ]
 
-const title = 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា | Bubble White'
-const description = 'ទិញទំនិញ Bubble White — សម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ និងសុខស្រួល ផលិតនៅភ្នំពេញ។ អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ រចនាឡើងសម្រាប់ភាពសាមញ្ញ និងទំនុកចិត្ត។'
+const title = 'ផ្តល់ជូន​អតិថិជន​នូវ​សម្លៀកបំពាក់​គុណ​ភាព​ខ្ពស់​និងទាន់​សម័យ | BubbleWhite'
+const description = 'ទិញទំនិញ BubbleWhite — សម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ និងសុខស្រួល ផលិតនៅភ្នំពេញ។ អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ រចនាឡើងសម្រាប់ភាពសាមញ្ញ និងទំនុកចិត្ត។'
 
 useSeoMeta({
   title,
@@ -178,7 +178,7 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'ClothingStore',
-        name: 'Bubble White',
+        name: 'BubbleWhite',
         url: useRequestURL().origin,
         address: { '@type': 'PostalAddress', addressLocality: 'Phnom Penh', addressCountry: 'KH' },
       }),
