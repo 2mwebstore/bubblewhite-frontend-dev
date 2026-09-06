@@ -50,7 +50,7 @@ import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 
-useSeoMeta({ title: 'ប្តូរពាក្យសម្ងាត់ | BubbleWhite' })
+useSeoMeta({ title: 'ប្តូរពាក្យសម្ងាត់ | Bubble White' })
 
 const router = useRouter()
 const api = useCustomerApi()

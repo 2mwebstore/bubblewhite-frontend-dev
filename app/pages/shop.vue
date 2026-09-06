@@ -262,10 +262,10 @@ watch(loadMoreSentinel, (el) => {
   if (el && observer) observer.observe(el)
 })
 
-const title = activeCategoryName.value ? `${activeCategoryName.value} | BubbleWhite` : 'ផលិតផលទាំងអស់ | BubbleWhite'
+const title = activeCategoryName.value ? `${activeCategoryName.value} | Bubble White` : 'ផលិតផលទាំងអស់ | Bubble White'
 const description = activeCategoryName.value
-  ? `ស្វែងរកកម្រង ${activeCategoryName.value} របស់ BubbleWhite។`
-  : 'ស្វែងរកកម្រងផលិតផលពេញលេញរបស់ BubbleWhite — អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ សម្រាប់បុរស និងនារី។'
+  ? `ស្វែងរកកម្រង ${activeCategoryName.value} របស់ Bubble White។`
+  : 'ស្វែងរកកម្រងផលិតផលពេញលេញរបស់ Bubble White — អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ សម្រាប់បុរស និងនារី។'
 
 useSeoMeta({
   title,

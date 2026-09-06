@@ -21,7 +21,7 @@ const props = defineProps({
 const isNotFound = computed(() => (props.error?.statusCode || 404) === 404)
 
 useSeoMeta({
-  title: isNotFound.value ? 'រកមិនឃើញទំព័រ | BubbleWhite' : 'មានបញ្ហាកើតឡើង | BubbleWhite',
+  title: isNotFound.value ? 'រកមិនឃើញទំព័រ | Bubble White' : 'មានបញ្ហាកើតឡើង | Bubble White',
   description: 'មិនអាចរកឃើញទំព័រនេះទេ។',
 })
 

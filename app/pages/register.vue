@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-sm mx-auto px-6 py-16 md:py-24">
     <h1 class="font-sans font-bold text-2xl mb-1 text-center">បង្កើតគណនី</h1>
-    <p class="text-sm text-muted text-center mb-8">ចូលរួមជាមួយ BubbleWhite</p>
+    <p class="text-sm text-muted text-center mb-8">ចូលរួមជាមួយ Bubble White</p>
 
     <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
       <div>
@@ -65,6 +65,17 @@
       </button>
     </form>
 
+    <div v-if="showSocialLogin" class="flex items-center gap-3 my-6">
+      <div class="flex-1 h-px bg-line" />
+      <span class="text-xs text-muted">ឬ</span>
+      <div class="flex-1 h-px bg-line" />
+    </div>
+
+    <div v-if="showSocialLogin" class="space-y-3">
+      <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
+    </div>
+
     <p class="text-sm text-muted text-center mt-6">
       មានគណនីរួចហើយ?
       <NuxtLink :to="{ path: '/login', query: route.query }" class="text-rust font-medium hover:underline">ចូលគណនី</NuxtLink>
@@ -73,14 +84,14 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
 
-useSeoMeta({ title: 'បង្កើតគណនី | BubbleWhite' })
+useSeoMeta({ title: 'បង្កើតគណនី | Bubble White' })
 
 const route = useRoute()
 const router = useRouter()
@@ -89,9 +100,30 @@ const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
 
+// Same reasoning as login.vue: only shown when a provider is actually
+// configured.
+const config = useRuntimeConfig()
+const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
+
 const form = reactive({ name: '', phone: '', email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
+
+// A Google/Facebook signup on this page does the exact same "find or
+// create" the backend already does for a returning customer — there's
+// nothing register-specific about the social flow, so this is identical
+// to login.vue's own onSocialSuccess.
+async function onSocialSuccess({ token, customer }) {
+  error.value = ''
+  setSession(token, customer)
+  await fetchCart()
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/account'
+  router.push(redirect)
+}
+
+function onSocialError(message) {
+  error.value = message
+}
 
 async function submit() {
   error.value = ''

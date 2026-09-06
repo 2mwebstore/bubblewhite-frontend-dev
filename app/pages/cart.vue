@@ -255,7 +255,7 @@ import { paymentLabel, statusLabel, statusClass, formatOrderDate } from '~/compo
 import { usePaymentMethods } from '~/composables/usePaymentMethods'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
 
-useSeoMeta({ title: 'រទេះទំនិញ | BubbleWhite' })
+useSeoMeta({ title: 'រទេះទំនិញ | Bubble White' })
 
 const router = useRouter()
 const route = useRoute()

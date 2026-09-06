@@ -2,7 +2,7 @@
   <div>
     <section class="max-w-7xl mx-auto px-6 py-16 items-center" data-aos="zoom-in">
       <div class="w-full card-surface overflow-hidden">
-        <img src="/banners/contact-hero.png" alt="កាតកូនក្រណាត់ BubbleWhite" class="w-full h-full object-cover" loading="eager" fetchpriority="high" />
+        <img src="/banners/contact-hero.png" alt="កាតកូនក្រណាត់ Bubble White" class="w-full h-full object-cover" loading="eager" fetchpriority="high" />
       </div>
     </section>
 
@@ -59,7 +59,7 @@
           </div>
         </div>
         <div class="hidden md:block aspect-square card-surface overflow-hidden" data-aos="zoom-in">
-          <img src="/banners/faq-flatlay.png" alt="អាវយឺត និងអាវហ៊ូឌី BubbleWhite បត់ជាប់" class="w-full h-full object-cover" loading="lazy" />
+          <img src="/banners/faq-flatlay.png" alt="អាវយឺត និងអាវហ៊ូឌី Bubble White បត់ជាប់" class="w-full h-full object-cover" loading="lazy" />
         </div>
       </div>
     </section>
@@ -106,8 +106,8 @@ const faqs = [
   { q: 'តើអ្នកទទួលការទូទាត់តាមមធ្យោបាយអ្វីខ្លះ?', a: 'យើងទទួល ABA PayWay, KHQR, Visa និង Mastercard។' },
 ]
 
-const title = 'ទំនាក់ទំនង | BubbleWhite'
-const description = 'ទាក់ទងមក BubbleWhite — សំណួរអំពីការបញ្ជាទិញ ការដឹកជញ្ជូន ការប្តូរ ឬបញ្ហាផ្សេងទៀត។'
+const title = 'ទំនាក់ទំនង | Bubble White'
+const description = 'ទាក់ទងមក Bubble White — សំណួរអំពីការបញ្ជាទិញ ការដឹកជញ្ជូន ការប្តូរ ឬបញ្ហាផ្សេងទៀត។'
 
 useSeoMeta({ title, description, ogTitle: title, ogDescription: description, ogType: 'website' })
 useHead({

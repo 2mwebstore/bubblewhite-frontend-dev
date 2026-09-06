@@ -55,7 +55,7 @@ import { ref, onMounted } from 'vue'
 import { Loader2, CheckCircle2, Clock, AlertTriangle } from 'lucide-vue-next'
 import { useOrders } from '~/composables/useOrders'
 
-useSeoMeta({ title: 'ស្ថានភាពការទូទាត់ | BubbleWhite' })
+useSeoMeta({ title: 'ស្ថានភាពការទូទាត់ | Bubble White' })
 
 const route = useRoute()
 const { getPPCBankReturnStatus } = useOrders()

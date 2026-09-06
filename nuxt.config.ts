@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'km' },
       link: [
-         // Favicon
+          // Favicon
         {
           rel: 'icon',
           type: 'image/png',
@@ -76,6 +76,24 @@ export default defineNuxtConfig({
       // configs mostly carry over — Nuxt just needs the NUXT_PUBLIC_ prefix
       // to expose it to the client bundle.
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api',
+
+      // Public by design — a Google/Facebook client ID is meant to be
+      // visible in the browser (it identifies the app, not a secret;
+      // Facebook's actual secret stays backend-only, never exposed here).
+      // Both default to empty string, which the login/register pages use
+      // to hide the corresponding button entirely rather than show one
+      // that would just fail — see SocialLoginButtons.vue.
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+      facebookAppId: process.env.NUXT_PUBLIC_FACEBOOK_APP_ID || '',
+      // Same value the `site.url` key below configures for the sitemap
+      // module, exposed here too as an explicit, ordinary runtime config
+      // field — needed by app.vue's structured data (JSON-LD), which
+      // reads it via the standard useRuntimeConfig() pattern already
+      // used for apiBaseUrl above. The sitemap module's own `site.url`
+      // key is a separate, module-specific config surface, not something
+      // that automatically becomes part of runtimeConfig.public on its
+      // own.
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     },
   },
 
@@ -114,6 +132,43 @@ export default defineNuxtConfig({
       // again. Since our sitemap depends on live database content, it has
       // to stay a real per-request route.
       ignore: ['/sitemap.xml'],
+    },
+    routeRules: {
+      // Security headers on every response, addressing a real external
+      // scan (PentestTools) that flagged all four as missing on the live
+      // site. These are genuinely low-risk to add — X-Content-Type-Options,
+      // Referrer-Policy, and HSTS don't change how the site behaves, they
+      // only restrict what a BROWSER is allowed to do with the response.
+      '/**': {
+        headers: {
+          // Stops a browser from "helpfully" re-interpreting a response
+          // as a different content-type than declared (e.g. treating an
+          // uploaded file as HTML/JS) — a real vector for XSS via file
+          // upload on other sites, blocked outright here.
+          'X-Content-Type-Options': 'nosniff',
+          // Never sends the previous page's full URL to a site a
+          // customer clicks through to — least-leaky option that still
+          // sends a same-origin referrer for your own internal
+          // navigation and analytics.
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          // Forces HTTPS for a year, including subdomains — the scanner
+          // specifically flags anything below 7,776,000 seconds (90
+          // days) as too low; this uses the standard 1-year value.
+          // Safe to set unconditionally here since the whole site is
+          // already served over HTTPS (confirmed by the scan itself
+          // being run against https://bubblewhite.co).
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+          // Content-Security-Policy is NOT set here — it needs the
+          // actual runtime apiBaseUrl (which can differ from whatever
+          // was set at build time — the same NUXT_PUBLIC_* env var this
+          // project has already been bitten by once: it's correctly
+          // runtime-overridable for the runtimeConfig field, but a
+          // process.env read directly inside this config file is not,
+          // since nuxt.config.ts itself only runs once at build). See
+          // server/middleware/security-headers.ts, which builds it
+          // per-request via useRuntimeConfig() instead.
+        },
+      },
     },
   },
 })

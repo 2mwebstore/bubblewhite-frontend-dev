@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-sm mx-auto px-6 py-16 md:py-24">
     <h1 class="font-sans font-bold text-2xl mb-1 text-center">ចូលគណនី</h1>
-    <p class="text-sm text-muted text-center mb-8">សូមស្វាគមន៍មកកាន់ BubbleWhite វិញ</p>
+    <p class="text-sm text-muted text-center mb-8">សូមស្វាគមន៍មកកាន់ Bubble White វិញ</p>
 
     <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
       <div>
@@ -37,6 +37,17 @@
       </button>
     </form>
 
+    <div v-if="showSocialLogin" class="flex items-center gap-3 my-6">
+      <div class="flex-1 h-px bg-line" />
+      <span class="text-xs text-muted">ឬ</span>
+      <div class="flex-1 h-px bg-line" />
+    </div>
+
+    <div v-if="showSocialLogin" class="space-y-3">
+      <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
+    </div>
+
     <p class="text-sm text-muted text-center mt-6">
       មិនទាន់មានគណនីទេ?
       <NuxtLink :to="{ path: '/register', query: route.query }" class="text-rust font-medium hover:underline">បង្កើតគណនី</NuxtLink>
@@ -45,14 +56,14 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
 
-useSeoMeta({ title: 'ចូលគណនី | BubbleWhite' })
+useSeoMeta({ title: 'ចូលគណនី | Bubble White' })
 
 const route = useRoute()
 const router = useRouter()
@@ -61,9 +72,31 @@ const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
 
+// Only shown when at least one provider is actually configured — an admin
+// who hasn't set up Google/Facebook yet sees a normal phone/password form
+// with no dead-end buttons.
+const config = useRuntimeConfig()
+const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
+
 const form = reactive({ identifier: '', password: '' })
 const loading = ref(false)
 const error = ref('')
+
+// Shared by both social buttons — same post-login steps as the regular
+// phone/password submit() below (pull in the customer's saved cart, then
+// redirect), since the backend already returns the identical {token,
+// customer} shape regardless of how they signed in.
+async function onSocialSuccess({ token, customer }) {
+  error.value = ''
+  setSession(token, customer)
+  await fetchCart()
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/account'
+  router.push(redirect)
+}
+
+function onSocialError(message) {
+  error.value = message
+}
 
 async function submit() {
   error.value = ''

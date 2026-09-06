@@ -5,7 +5,7 @@
         <p class="section-label mb-2">អំពីយើង</p>
         <h1 class="font-sans font-bold text-4xl mb-5 leading-tight">សាមញ្ញ ស្អាត។<br />តែងតែជាអ្នក។</h1>
         <p class="text-muted leading-relaxed mb-4">
-          BubbleWhite កើតចេញពីគំនិតសាមញ្ញមួយ៖ សម្លៀកបំពាក់ដែលធ្វើឱ្យអ្នកមានទំនុកចិត្ត សុខស្រួល និងជាអ្នកពិតប្រាកដ។
+          Bubble White កើតចេញពីគំនិតសាមញ្ញមួយ៖ សម្លៀកបំពាក់ដែលធ្វើឱ្យអ្នកមានទំនុកចិត្ត សុខស្រួល និងជាអ្នកពិតប្រាកដ។
         </p>
         <p class="text-muted leading-relaxed mb-6">
           យើងជឿជាក់ថាម៉ូតសាមញ្ញគឺលើសពីម៉ូតទំនើប វាជារបៀបរស់នៅមួយ។ ផលិតផលរបស់យើងត្រូវបានរចនាឡើងសម្រាប់ជីវិតប្រចាំថ្ងៃរបស់អ្នក — ស្លៀកស្រួល ចូលចិត្តស្រួល។
@@ -13,7 +13,7 @@
         <NuxtLink to="/shop" class="btn-primary">រឿងរ៉ាវរបស់យើង →</NuxtLink>
       </div>
       <div class="aspect-[4/3] card-surface overflow-hidden" data-aos="zoom-in">
-        <img src="/banners/about-hero.png" alt="ស្ថាបនិក BubbleWhite ស្លៀកអាវយឺតធំរបស់ម៉ាក" class="w-full h-full object-cover" style="object-position: 50% 20%" loading="eager" fetchpriority="high" />
+        <img src="/banners/about-hero.png" alt="ស្ថាបនិក Bubble White ស្លៀកអាវយឺតធំរបស់ម៉ាក" class="w-full h-full object-cover" style="object-position: 50% 20%" loading="eager" fetchpriority="high" />
       </div>
     </section>
 
@@ -36,15 +36,15 @@
         <h2 class="font-sans font-bold text-2xl mb-4">រឿងរ៉ាវរបស់យើង</h2>
         <p v-if="settings?.companyDetail" class="text-muted leading-relaxed mb-3">{{ settings.companyDetail }}</p>
         <template v-else>
-          <p class="text-muted leading-relaxed mb-3">BubbleWhite បានចាប់ផ្តើមនៅភ្នំពេញ កម្ពុជា ក្នុងឆ្នាំ ២០២៤។</p>
+          <p class="text-muted leading-relaxed mb-3">Bubble White បានចាប់ផ្តើមនៅភ្នំពេញ កម្ពុជា ក្នុងឆ្នាំ ២០២៤។</p>
           <p class="text-muted leading-relaxed mb-3">យើងចង់បង្កើតម៉ាកមួយដែលផ្តោតលើភាពសាមញ្ញ គុណភាព និងតម្លៃសមរម្យ។</p>
           <p class="text-muted leading-relaxed mb-3">ចាប់ពីការជ្រើសរើសក្រណាត់ រហូតដល់របៀបវេចខ្ចប់ការបញ្ជាទិញរបស់អ្នក យើងយកចិត្តទុកដាក់ចំពោះរាល់ព័ត៌មានលម្អិត។</p>
         </template>
-        <p class="text-muted italic mt-6">— ក្រុម BubbleWhite</p>
+        <p class="text-muted italic mt-6">— ក្រុម Bubble White</p>
       </div>
       <div class="grid grid-cols-2 gap-4" data-aos="zoom-in">
-        <div class="aspect-square card-surface overflow-hidden"><img src="/banners/story-rack.png" alt="ធ្នើដាក់សម្លៀកបំពាក់ BubbleWhite" class="w-full h-full object-cover" loading="lazy" /></div>
-        <div class="aspect-square card-surface overflow-hidden"><img src="/banners/story-box.png" alt="កញ្ចប់ការបញ្ជាទិញ BubbleWhite" class="w-full h-full object-cover" loading="lazy" /></div>
+        <div class="aspect-square card-surface overflow-hidden"><img src="/banners/story-rack.png" alt="ធ្នើដាក់សម្លៀកបំពាក់ Bubble White" class="w-full h-full object-cover" loading="lazy" /></div>
+        <div class="aspect-square card-surface overflow-hidden"><img src="/banners/story-box.png" alt="កញ្ចប់ការបញ្ជាទិញ Bubble White" class="w-full h-full object-cover" loading="lazy" /></div>
       </div>
     </section>
 
@@ -82,8 +82,8 @@ const stats = [
   { value: '98%', label: 'ការវាយតម្លៃវិជ្ជមាន' },
 ]
 
-const title = 'អំពីយើង | BubbleWhite'
-const description = 'BubbleWhite បានចាប់ផ្តើមនៅភ្នំពេញ កម្ពុជា ក្នុងឆ្នាំ ២០២៤ ដោយផ្តោតលើសម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ សុខស្រួល និងតម្លៃសមរម្យ។'
+const title = 'អំពីយើង | Bubble White'
+const description = 'Bubble White បានចាប់ផ្តើមនៅភ្នំពេញ កម្ពុជា ក្នុងឆ្នាំ ២០២៤ ដោយផ្តោតលើសម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ សុខស្រួល និងតម្លៃសមរម្យ។'
 
 useSeoMeta({
   title,

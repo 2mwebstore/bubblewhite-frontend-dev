@@ -13,7 +13,7 @@
       <!-- sweatshirt / default -->
       <path v-else-if="kind === 'sweat'" d="M66 82 L40 100 L54 120 L68 108 V182 H132 V108 L146 120 L160 100 L134 82 Q100 96 66 82 Z" />
     </g>
-    <text x="100" y="220" text-anchor="middle" font-family="Manrope, sans-serif" font-size="9" letter-spacing="2" :fill="fg" opacity="0.55">BubbleWhite</text>
+    <text x="100" y="220" text-anchor="middle" font-family="Manrope, sans-serif" font-size="9" letter-spacing="2" :fill="fg" opacity="0.55">BUBBLE WHITE</text>
   </svg>
 </template>
 

@@ -39,7 +39,7 @@ import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 
-useSeoMeta({ title: 'គណនីរបស់ខ្ញុំ | BubbleWhite' })
+useSeoMeta({ title: 'គណនីរបស់ខ្ញុំ | Bubble White' })
 
 const router = useRouter()
 const api = useCustomerApi()

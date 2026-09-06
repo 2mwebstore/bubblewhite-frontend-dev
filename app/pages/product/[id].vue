@@ -50,7 +50,7 @@
             <SkeletonImage
               :src="img"
               :alt="`${product.name} thumbnail ${i + 1}`"
-              wrapper-class="w-full aspect-[3/4] rounded-2xl"
+              wrapper-class="w-full h-full"
               img-class="w-full h-full object-cover"
               object-position="65% center"
             />
@@ -257,7 +257,7 @@ const p = product.value
 const canonicalUrl = useRequestURL().origin + `/product/${p.id}`
 
 useSeoMeta({
-  title: `${p.name} | BubbleWhite`,
+  title: `${p.name} | Bubble White`,
   description: p.description?.replace(/<[^>]*>/g, '').slice(0, 160),
   ogTitle: p.name,
   ogDescription: p.description?.replace(/<[^>]*>/g, '').slice(0, 160),

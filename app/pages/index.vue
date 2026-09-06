@@ -4,16 +4,16 @@
          yet (e.g. a client-side refetch); the normal SSR-awaited first
          load already has real data by the time this ever renders. -->
     <section v-if="pending && !data" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
-      <div class="w-full aspect-[21/9] skeleton-shimmer rounded-card" />
+      <div class="w-full aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9] skeleton-shimmer rounded-card" />
     </section>
     <section v-else-if="heroSlides.length" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
-      <div class="w-full card-surface overflow-hidden relative hero-swiper">
+      <div class="w-full aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9] card-surface overflow-hidden relative hero-swiper">
         <Swiper
           :modules="[Autoplay, Pagination]"
           :loop="heroSlides.length > 1"
           :autoplay="{ delay: 4500, disableOnInteraction: false }"
           :pagination="{ clickable: true }"
-          class="w-full h-auto"
+          class="w-full h-full"
         >
           <SwiperSlide v-for="(slide, i) in heroSlides" :key="slide.id">
             <component :is="slide.linkUrl ? 'a' : 'div'" :href="slide.linkUrl || undefined" class="block w-full h-full">
@@ -194,8 +194,8 @@ const features = [
   { title: 'ជំនួយ ២៤/៧', desc: 'យើងនៅទីនេះដើម្បីជួយ', icon: Headset },
 ]
 
-const title = 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា | BubbleWhite'
-const description = 'ទិញទំនិញ BubbleWhite — សម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ និងសុខស្រួល ផលិតនៅភ្នំពេញ។ អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ រចនាឡើងសម្រាប់ភាពសាមញ្ញ និងទំនុកចិត្ត។'
+const title = 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា | Bubble White'
+const description = 'ទិញទំនិញ Bubble White — សម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ និងសុខស្រួល ផលិតនៅភ្នំពេញ។ អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ រចនាឡើងសម្រាប់ភាពសាមញ្ញ និងទំនុកចិត្ត។'
 
 useSeoMeta({
   title,
@@ -213,7 +213,7 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'ClothingStore',
-        name: 'BubbleWhite',
+        name: 'Bubble White',
         url: useRequestURL().origin,
         address: { '@type': 'PostalAddress', addressLocality: 'Phnom Penh', addressCountry: 'KH' },
       }),
