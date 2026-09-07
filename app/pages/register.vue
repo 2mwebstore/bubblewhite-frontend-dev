@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-sm mx-auto px-6 py-16 md:py-24">
     <h1 class="font-sans font-bold text-2xl mb-1 text-center">បង្កើតគណនី</h1>
-    <p class="text-sm text-muted text-center mb-8">ចូលរួមជាមួយ Bubble White</p>
+    <p class="text-sm text-muted text-center mb-8">ចូលរួមជាមួយ BubbleWhite</p>
 
     <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
       <div>
@@ -29,18 +29,6 @@
           :class="fieldErrors.phone ? 'border-red-400' : ''"
         />
         <FieldError :message="fieldErrors.phone" />
-      </div>
-      <div>
-        <FormLabel text="អ៊ីមែល (ស្រេចចិត្ត)" for-id="reg-email" />
-        <input
-          id="reg-email"
-          v-model="form.email"
-          type="email"
-          autocomplete="email"
-          class="input-field text-sm"
-          :class="fieldErrors.email ? 'border-red-400' : ''"
-        />
-        <FieldError :message="fieldErrors.email" />
       </div>
       <div>
         <FormLabel text="ពាក្យសម្ងាត់" required for-id="reg-password" />
@@ -71,10 +59,9 @@
       <div class="flex-1 h-px bg-line" />
     </div>
 
-    <div v-if="showSocialLogin" class="space-y-3">
+    <div v-if="showSocialLogin" class="flex items-center justify-center gap-4">
       <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
       <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
-      <TelegramSignInButton @error="onSocialError" />
     </div>
 
     <p class="text-sm text-muted text-center mt-6">
@@ -85,15 +72,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
-import { useSocialAuth } from '~/composables/useSocialAuth'
 
-useSeoMeta({ title: 'បង្កើតគណនី | Bubble White' })
+useSeoMeta({ title: 'បង្កើតគណនី | BubbleWhite' })
 
 const route = useRoute()
 const router = useRouter()
@@ -101,14 +87,13 @@ const api = useCustomerApi()
 const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
-const { exchangeTelegramAuth } = useSocialAuth()
 
 // Same reasoning as login.vue: only shown when a provider is actually
 // configured.
 const config = useRuntimeConfig()
-const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId || config.public.telegramBotUsername))
+const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
 
-const form = reactive({ name: '', phone: '', email: '', password: '' })
+const form = reactive({ name: '', phone: '', password: '' })
 const loading = ref(false)
 const error = ref('')
 
@@ -123,29 +108,6 @@ async function onSocialSuccess({ token, customer }) {
   const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/account'
   router.push(redirect)
 }
-
-// Identical to login.vue's own Telegram redirect handling — see that
-// page's onMounted for why this uses the query-string redirect mode
-// instead of a JS callback.
-onMounted(async () => {
-  if (!route.query.hash) return
-
-  try {
-    const result = await exchangeTelegramAuth({
-      id: Number(route.query.id),
-      first_name: route.query.first_name || '',
-      last_name: route.query.last_name || '',
-      username: route.query.username || '',
-      photo_url: route.query.photo_url || '',
-      auth_date: Number(route.query.auth_date),
-      hash: route.query.hash,
-    })
-    await onSocialSuccess(result)
-  } catch (e) {
-    error.value = e.message || 'មិនអាចចូលគណនីតាម Telegram បានទេ'
-    router.replace({ path: route.path, query: {} })
-  }
-})
 
 function onSocialError(message) {
   error.value = message

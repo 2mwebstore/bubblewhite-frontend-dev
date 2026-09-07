@@ -1,8 +1,8 @@
 <template>
   <header class="sticky top-0 z-50 bg-cream/95 backdrop-blur border-b border-line">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-      <NuxtLink to="/" class="shrink-0" aria-label="Bubble White — ទំព័រដើម">
-        <img :src="settings?.logoUrl || '/logo.png'" alt="Bubble White" class="h-10 md:h-14 w-auto" />
+      <NuxtLink to="/" class="shrink-0" aria-label="BubbleWhite — ទំព័រដើម">
+        <img :src="settings?.logoUrl || '/logo.png'" alt="BubbleWhite" class="h-10 md:h-14 w-auto" />
       </NuxtLink>
 
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">

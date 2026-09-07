@@ -2,8 +2,8 @@
   <footer class="bg-ink text-cream mt-24 pb-16 md:pb-0">
     <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-5 gap-10">
       <div class="col-span-2">
-        <p class="font-sans font-extrabold text-lg mb-3">{{ settings?.companyName || 'bubble.white' }}</p>
-        <p class="text-sm text-cream/60 leading-relaxed max-w-xs">{{ settings?.companyDetail || 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា។' }}<br />សូមអរគុណដែលបានគាំទ្រ Bubble White។</p>
+        <p class="font-sans font-extrabold text-lg mb-3">{{ settings?.companyName || 'BubbleWhite' }}</p>
+        <p class="text-sm text-cream/60 leading-relaxed max-w-xs">{{ settings?.companyDetail || 'ហាង BubbleWhite យើងខ្ញុំមានលក់សម្លៀកបំពាក់បុរសនិងនារី ដែលផ្តល់ជូននូវគុណភាពខ្ពស់ និងម៉ូដទាន់សម័យជូនដល់អតិថិជន។ ផលិតផលរបស់យើងរួមមាន អាវយឺតដៃខ្លី អាវយឺតដៃវែង អាវក្រៅ។' }}</p>
         <div class="flex items-center gap-3 mt-5">
           <a v-for="s in socialLinks" :key="s.label" :href="s.href" target="_blank" rel="noopener" :aria-label="s.label" class="w-8 h-8 rounded-full border border-cream/25 flex items-center justify-center hover:border-cream transition-colors">
             <component :is="s.icon" v-if="s.icon" :size="14" :stroke-width="1.6" />
@@ -48,11 +48,10 @@
 
     <div class="border-t border-cream/10">
       <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream/50">
-        <p>© {{ year }} {{ settings?.companyName || 'Bubble White' }}។ រក្សាសិទ្ធិគ្រប់យ៉ាង។ <NuxtLink to="/privacy-policy" class="hover:text-cream underline">គោលការណ៍ភាពឯកជន</NuxtLink></p>
+        <p>© {{ year }} {{ settings?.companyName || 'BubbleWhite' }}។ រក្សាសិទ្ធិគ្រប់យ៉ាង។ <NuxtLink to="/privacy-policy" class="hover:text-cream underline">គោលការណ៍ភាពឯកជន</NuxtLink></p>
         <div class="flex items-center gap-2">
           <span class="border border-cream/25 rounded px-2 py-1">VISA</span>
           <span class="border border-cream/25 rounded px-2 py-1">Mastercard</span>
-          <span class="border border-cream/25 rounded px-2 py-1">ABA</span>
           <span class="border border-cream/25 rounded px-2 py-1">KHQR</span>
         </div>
       </div>

@@ -4,10 +4,10 @@
          yet (e.g. a client-side refetch); the normal SSR-awaited first
          load already has real data by the time this ever renders. -->
     <section v-if="pending && !data" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
-      <div class="w-full aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9] skeleton-shimmer rounded-card" />
+      <div class="w-full skeleton-shimmer rounded-card" />
     </section>
     <section v-else-if="heroSlides.length" class="max-w-7xl mx-auto px-6 pt-6 pb-6 md:pt-16 md:pb-16">
-      <div class="w-full aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9] card-surface overflow-hidden relative hero-swiper">
+      <div class="w-full card-surface overflow-hidden relative hero-swiper">
         <Swiper
           :modules="[Autoplay, Pagination]"
           :loop="heroSlides.length > 1"
@@ -194,8 +194,8 @@ const features = [
   { title: 'ជំនួយ ២៤/៧', desc: 'យើងនៅទីនេះដើម្បីជួយ', icon: Headset },
 ]
 
-const title = 'សម្លៀកបំពាក់សាមញ្ញ សុខស្រួលអតិបរមា | Bubble White'
-const description = 'ទិញទំនិញ Bubble White — សម្លៀកបំពាក់ប្រចាំថ្ងៃដ៏សាមញ្ញ និងសុខស្រួល ផលិតនៅភ្នំពេញ។ អាវយឺត អាវហ៊ូឌី និងគ្រឿងបន្លាស់ រចនាឡើងសម្រាប់ភាពសាមញ្ញ និងទំនុកចិត្ត។'
+const title = 'ផ្តល់ជូនអតិថិជននូវសម្លៀកបំពាក់គុណភាពខ្ពស់និងទាន់សម័យ | BubbleWhite'
+const description = 'ហាង BubbleWhite យើងខ្ញុំមានលក់សម្លៀកបំពាក់បុរសនិងនារី ដែលផ្តល់ជូននូវគុណភាពខ្ពស់ និងម៉ូដទាន់សម័យជូនដល់អតិថិជន។ ផលិតផលរបស់យើងរួមមាន អាវយឺតដៃខ្លី អាវយឺតដៃវែង អាវក្រៅ។'
 
 useSeoMeta({
   title,
@@ -213,7 +213,7 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'ClothingStore',
-        name: 'Bubble White',
+        name: 'BubbleWhite',
         url: useRequestURL().origin,
         address: { '@type': 'PostalAddress', addressLocality: 'Phnom Penh', addressCountry: 'KH' },
       }),

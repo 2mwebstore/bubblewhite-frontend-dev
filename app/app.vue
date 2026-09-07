@@ -59,7 +59,7 @@ useHead(() => ({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: settings.value?.companyName || 'Bubble White',
+        name: settings.value?.companyName || 'BubbleWhite',
         url: siteUrl,
         potentialAction: {
           '@type': 'SearchAction',

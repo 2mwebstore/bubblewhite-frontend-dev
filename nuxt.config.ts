@@ -85,10 +85,6 @@ export default defineNuxtConfig({
       // that would just fail — see SocialLoginButtons.vue.
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
       facebookAppId: process.env.NUXT_PUBLIC_FACEBOOK_APP_ID || '',
-      // The bot's @username (without the @) — needed by the Telegram
-      // Login Widget's script tag. Nothing secret here; the bot TOKEN
-      // that actually verifies sign-ins stays backend-only.
-      telegramBotUsername: process.env.NUXT_PUBLIC_TELEGRAM_BOT_USERNAME || '',
       // Same value the `site.url` key below configures for the sitemap
       // module, exposed here too as an explicit, ordinary runtime config
       // field — needed by app.vue's structured data (JSON-LD), which

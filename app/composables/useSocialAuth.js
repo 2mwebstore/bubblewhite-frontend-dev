@@ -78,10 +78,5 @@ export function useSocialAuth() {
     loadFacebookScript,
     exchangeGoogleToken: (idToken) => exchangeWithBackend('/customer/auth/google', { idToken }),
     exchangeFacebookToken: (accessToken) => exchangeWithBackend('/customer/auth/facebook', { accessToken }),
-    // Telegram's payload IS the whole body — id/first_name/last_name/
-    // username/photo_url/auth_date/hash — unlike Google/Facebook's single
-    // token, so this passes it straight through rather than wrapping it
-    // in a named field.
-    exchangeTelegramAuth: (payload) => exchangeWithBackend('/customer/auth/telegram', payload),
   }
 }

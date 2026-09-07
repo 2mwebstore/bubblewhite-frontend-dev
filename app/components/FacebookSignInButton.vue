@@ -1,28 +1,30 @@
 <template>
   <!-- Unlike Google, Facebook's SDK doesn't render its own button — this
-       is a plain styled button that calls FB.login() directly, matching
-       this app's existing button conventions instead of Facebook's own
-       (optional, more restrictive) branded button component. Hidden
-       entirely when no app ID is configured, same reasoning as
-       GoogleSignInButton. -->
+       is a plain custom button that calls FB.login() directly. Icon-only,
+       circular, matching the same size/style as the Google icon button
+       next to it. aria-label/title carry the text an icon-only button
+       would otherwise lose for screen readers and on hover. -->
   <button
     v-if="appId"
     type="button"
-    class="w-full flex items-center justify-center gap-2 border border-line rounded-lg py-2.5 text-sm font-medium hover:bg-cream-dark transition-colors disabled:opacity-60"
+    class="w-10 h-10 rounded-full border border-line flex items-center justify-center hover:bg-cream-dark transition-colors disabled:opacity-60"
     :disabled="loading || !sdkReady"
+    aria-label="បន្តជាមួយ Facebook"
+    title="បន្តជាមួយ Facebook"
     @click="signIn"
   >
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
+    <Loader2 v-if="loading || !sdkReady" :size="18" class="animate-spin text-muted" />
+    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
       <path
         d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
       />
     </svg>
-    {{ loading ? 'កំពុងចូល…' : !sdkReady ? 'កំពុងផ្ទុក…' : 'បន្តជាមួយ Facebook' }}
   </button>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { Loader2 } from 'lucide-vue-next'
 import { loadFacebookScript, useSocialAuth } from '~/composables/useSocialAuth'
 
 const emit = defineEmits(['success', 'error'])

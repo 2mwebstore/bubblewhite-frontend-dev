@@ -81,7 +81,7 @@ import {
   formatOrderDateTime as formatDate,
 } from '~/composables/useOrderDisplay'
 
-useSeoMeta({ title: 'ព័ត៌មានលម្អិតការបញ្ជាទិញ | Bubble White' })
+useSeoMeta({ title: 'ព័ត៌មានលម្អិតការបញ្ជាទិញ | BubbleWhite' })
 
 const route = useRoute()
 const router = useRouter()

@@ -4,8 +4,9 @@
        satisfies their branding guidelines and a custom-styled substitute
        would risk violating them. Hidden entirely (v-if) when no client ID
        is configured, rather than rendering a button that would only ever
-       fail on click. -->
-  <div v-if="clientId" ref="buttonEl" class="w-full flex justify-center" />
+       fail on click. Icon-only, circular shape — no wrapper sizing needed
+       since Google's own icon button is a fixed, small square/circle. -->
+  <div v-if="clientId" ref="buttonEl" />
 </template>
 
 <script setup>
@@ -33,13 +34,14 @@ onMounted(async () => {
   try {
     const google = await loadGoogleScript()
     google.accounts.id.initialize({ client_id: clientId, callback: handleCredential })
+    // type: 'icon' + shape: 'circle' — logo only, no "Continue with
+    // Google" text, per Google's own documented GsiButtonConfiguration
+    // options (developers.google.com/identity/gsi/web/reference/js-reference).
     google.accounts.id.renderButton(buttonEl.value, {
-      type: 'standard',
+      type: 'icon',
       theme: 'outline',
       size: 'large',
-      width: 320,
-      text: 'continue_with',
-      locale: 'km',
+      shape: 'circle',
     })
   } catch (e) {
     emit('error', e.message || 'មិនអាចផ្ទុក Google Sign-In បានទេ')

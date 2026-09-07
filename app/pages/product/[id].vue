@@ -257,7 +257,7 @@ const p = product.value
 const canonicalUrl = useRequestURL().origin + `/product/${p.id}`
 
 useSeoMeta({
-  title: `${p.name} | Bubble White`,
+  title: `${p.name} | BubbleWhite`,
   description: p.description?.replace(/<[^>]*>/g, '').slice(0, 160),
   ogTitle: p.name,
   ogDescription: p.description?.replace(/<[^>]*>/g, '').slice(0, 160),
