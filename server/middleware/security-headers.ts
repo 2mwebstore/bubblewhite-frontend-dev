@@ -46,14 +46,16 @@ export default defineEventHandler((event) => {
   // Login, and the Telegram Login Widget each need script-src (their own
   // JS library) and frame-src (their actual sign-in UI renders as an
   // iframe from their own domain, not the page's origin) — confirmed
-  // against each provider's own official docs, plus a real CSP violation
-  // report from the live site for Google's script specifically that
-  // caught this CSP had no frame-src at all before (silently falling
-  // back to default-src 'self' and blocking all three). Google's GIS
-  // library additionally needs connect-src, since it calls its own
-  // status/credential endpoints directly from the browser — Facebook and
-  // Telegram's flows don't make comparable frontend network calls of
-  // their own.
+  // against each provider's own official docs, plus real CSP violation
+  // reports from the live site that caught two gaps this CSP didn't
+  // originally cover: no frame-src at all (silently falling back to
+  // default-src 'self' and blocking all three), and Facebook's SDK
+  // additionally calling connect.facebook.net/app_config/... directly
+  // from the browser to fetch its own app configuration — a connect-src
+  // need that isn't obvious from Facebook's setup docs alone. Google's
+  // GIS library also needs connect-src for its own status/credential
+  // endpoints; Telegram's flow makes no comparable frontend network call
+  // of its own.
   // Google's own docs specifically recommend the /gsi/ PARENT path here
   // rather than individual endpoint URLs, so a future Google-side
   // endpoint change under that path doesn't silently break this again.
@@ -63,7 +65,7 @@ export default defineEventHandler((event) => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
-    `connect-src 'self' https://cloudflareinsights.com https://accounts.google.com/gsi/${apiOrigin ? ' ' + apiOrigin : ''}`,
+    `connect-src 'self' https://cloudflareinsights.com https://accounts.google.com/gsi/ https://connect.facebook.net${apiOrigin ? ' ' + apiOrigin : ''}`,
     "frame-src https://accounts.google.com/gsi/ https://www.facebook.com https://oauth.telegram.org",
     "frame-ancestors 'self'",
     "base-uri 'self'",

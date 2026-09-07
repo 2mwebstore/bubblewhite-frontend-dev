@@ -46,7 +46,7 @@
     <div v-if="showSocialLogin" class="space-y-3">
       <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
       <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
-      <TelegramSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <TelegramSignInButton @error="onSocialError" />
     </div>
 
     <p class="text-sm text-muted text-center mt-6">
@@ -57,12 +57,13 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
+import { useSocialAuth } from '~/composables/useSocialAuth'
 
 useSeoMeta({ title: 'ចូលគណនី | Bubble White' })
 
@@ -72,6 +73,7 @@ const api = useCustomerApi()
 const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
+const { exchangeTelegramAuth } = useSocialAuth()
 
 // Only shown when at least one provider is actually configured — an admin
 // who hasn't set up Google/Facebook yet sees a normal phone/password form
@@ -98,6 +100,36 @@ async function onSocialSuccess({ token, customer }) {
 function onSocialError(message) {
   error.value = message
 }
+
+// Telegram's widget uses the data-auth-url redirect mode (see
+// TelegramSignInButton's own comment for why — avoids the widget's
+// internal eval() usage, which would otherwise require weakening the CSP
+// with 'unsafe-eval'). That means the auth result arrives as query
+// parameters on THIS page after a full redirect, not as a JS callback —
+// checked once on mount, same idea as PPCBank's return-from-redirect
+// checkout flow.
+onMounted(async () => {
+  if (!route.query.hash) return
+
+  try {
+    const result = await exchangeTelegramAuth({
+      id: Number(route.query.id),
+      first_name: route.query.first_name || '',
+      last_name: route.query.last_name || '',
+      username: route.query.username || '',
+      photo_url: route.query.photo_url || '',
+      auth_date: Number(route.query.auth_date),
+      hash: route.query.hash,
+    })
+    await onSocialSuccess(result)
+  } catch (e) {
+    error.value = e.message || 'មិនអាចចូលគណនីតាម Telegram បានទេ'
+    // Strip the auth data out of the URL even on failure — it's already
+    // been used (or rejected) once and shouldn't linger visibly in the
+    // address bar or be re-submitted on a page refresh.
+    router.replace({ path: route.path, query: {} })
+  }
+})
 
 async function submit() {
   error.value = ''

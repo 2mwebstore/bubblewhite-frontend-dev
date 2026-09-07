@@ -74,7 +74,7 @@
     <div v-if="showSocialLogin" class="space-y-3">
       <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
       <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
-      <TelegramSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <TelegramSignInButton @error="onSocialError" />
     </div>
 
     <p class="text-sm text-muted text-center mt-6">
@@ -85,12 +85,13 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
+import { useSocialAuth } from '~/composables/useSocialAuth'
 
 useSeoMeta({ title: 'បង្កើតគណនី | Bubble White' })
 
@@ -100,6 +101,7 @@ const api = useCustomerApi()
 const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
+const { exchangeTelegramAuth } = useSocialAuth()
 
 // Same reasoning as login.vue: only shown when a provider is actually
 // configured.
@@ -121,6 +123,29 @@ async function onSocialSuccess({ token, customer }) {
   const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/account'
   router.push(redirect)
 }
+
+// Identical to login.vue's own Telegram redirect handling — see that
+// page's onMounted for why this uses the query-string redirect mode
+// instead of a JS callback.
+onMounted(async () => {
+  if (!route.query.hash) return
+
+  try {
+    const result = await exchangeTelegramAuth({
+      id: Number(route.query.id),
+      first_name: route.query.first_name || '',
+      last_name: route.query.last_name || '',
+      username: route.query.username || '',
+      photo_url: route.query.photo_url || '',
+      auth_date: Number(route.query.auth_date),
+      hash: route.query.hash,
+    })
+    await onSocialSuccess(result)
+  } catch (e) {
+    error.value = e.message || 'មិនអាចចូលគណនីតាម Telegram បានទេ'
+    router.replace({ path: route.path, query: {} })
+  }
+})
 
 function onSocialError(message) {
   error.value = message
