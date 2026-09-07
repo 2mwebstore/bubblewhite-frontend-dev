@@ -74,6 +74,7 @@
     <div v-if="showSocialLogin" class="space-y-3">
       <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
       <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <TelegramSignInButton @success="onSocialSuccess" @error="onSocialError" />
     </div>
 
     <p class="text-sm text-muted text-center mt-6">
@@ -103,7 +104,7 @@ const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
 // Same reasoning as login.vue: only shown when a provider is actually
 // configured.
 const config = useRuntimeConfig()
-const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
+const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId || config.public.telegramBotUsername))
 
 const form = reactive({ name: '', phone: '', email: '', password: '' })
 const loading = ref(false)

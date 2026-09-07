@@ -46,6 +46,7 @@
     <div v-if="showSocialLogin" class="space-y-3">
       <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
       <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <TelegramSignInButton @success="onSocialSuccess" @error="onSocialError" />
     </div>
 
     <p class="text-sm text-muted text-center mt-6">
@@ -76,7 +77,7 @@ const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
 // who hasn't set up Google/Facebook yet sees a normal phone/password form
 // with no dead-end buttons.
 const config = useRuntimeConfig()
-const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
+const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId || config.public.telegramBotUsername))
 
 const form = reactive({ identifier: '', password: '' })
 const loading = ref(false)

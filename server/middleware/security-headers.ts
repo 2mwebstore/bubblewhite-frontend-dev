@@ -42,30 +42,29 @@ export default defineEventHandler((event) => {
   // confirmed by an actual browser CSP violation report against the
   // live site before adding this.
   //
-  // Google Identity Services (Sign in with Google / One Tap) and Facebook
-  // Login both need three things each, confirmed against Google's own
-  // official CSP guidance and Facebook's documented SDK requirements
-  // (also confirmed directly against a real CSP violation report from
-  // the live site for Google's script specifically):
-  //  - script-src: where each provider's own JS library loads from.
-  //  - connect-src: Google's GIS library calls its own status/credential
-  //    endpoints under this same path directly from the browser.
-  //  - frame-src (a directive this CSP didn't have at all before, so it
-  //    was falling back to default-src 'self' and silently blocking
-  //    both): both providers render their actual sign-in UI (the One Tap
-  //    prompt, the Facebook login dialog) inside an iframe from their own
-  //    domain, not the page's own origin.
+  // Google Identity Services (Sign in with Google / One Tap), Facebook
+  // Login, and the Telegram Login Widget each need script-src (their own
+  // JS library) and frame-src (their actual sign-in UI renders as an
+  // iframe from their own domain, not the page's origin) — confirmed
+  // against each provider's own official docs, plus a real CSP violation
+  // report from the live site for Google's script specifically that
+  // caught this CSP had no frame-src at all before (silently falling
+  // back to default-src 'self' and blocking all three). Google's GIS
+  // library additionally needs connect-src, since it calls its own
+  // status/credential endpoints directly from the browser — Facebook and
+  // Telegram's flows don't make comparable frontend network calls of
+  // their own.
   // Google's own docs specifically recommend the /gsi/ PARENT path here
   // rather than individual endpoint URLs, so a future Google-side
   // endpoint change under that path doesn't silently break this again.
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://accounts.google.com/gsi/client https://connect.facebook.net",
+    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://accounts.google.com/gsi/client https://connect.facebook.net https://telegram.org",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
     `connect-src 'self' https://cloudflareinsights.com https://accounts.google.com/gsi/${apiOrigin ? ' ' + apiOrigin : ''}`,
-    "frame-src https://accounts.google.com/gsi/ https://www.facebook.com",
+    "frame-src https://accounts.google.com/gsi/ https://www.facebook.com https://oauth.telegram.org",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",

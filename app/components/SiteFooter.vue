@@ -52,6 +52,7 @@
         <div class="flex items-center gap-2">
           <span class="border border-cream/25 rounded px-2 py-1">VISA</span>
           <span class="border border-cream/25 rounded px-2 py-1">Mastercard</span>
+          <span class="border border-cream/25 rounded px-2 py-1">ABA</span>
           <span class="border border-cream/25 rounded px-2 py-1">KHQR</span>
         </div>
       </div>
