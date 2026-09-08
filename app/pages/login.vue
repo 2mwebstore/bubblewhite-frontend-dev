@@ -3,7 +3,26 @@
     <h1 class="font-sans font-bold text-2xl mb-1 text-center">ចូលគណនី</h1>
     <p class="text-sm text-muted text-center mb-8">សូមស្វាគមន៍មកកាន់ BubbleWhite វិញ</p>
 
-    <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
+    <div class="flex items-center gap-2 mb-4 p-1 bg-cream-dark rounded-lg">
+      <button
+        type="button"
+        class="flex-1 py-2 text-sm rounded-md transition-colors"
+        :class="method === 'password' ? 'bg-white shadow-sm font-medium' : 'text-muted'"
+        @click="method = 'password'"
+      >
+        ពាក្យសម្ងាត់
+      </button>
+      <button
+        type="button"
+        class="flex-1 py-2 text-sm rounded-md transition-colors"
+        :class="method === 'otp' ? 'bg-white shadow-sm font-medium' : 'text-muted'"
+        @click="method = 'otp'"
+      >
+        លេខកូដ OTP
+      </button>
+    </div>
+
+    <form v-if="method === 'password'" class="card-surface p-6 space-y-4" @submit.prevent="submit">
       <div>
         <FormLabel text="លេខទូរស័ព្ទ ឬអ៊ីមែល" required for-id="login-identifier" />
         <input
@@ -37,6 +56,10 @@
       </button>
     </form>
 
+    <div v-else class="card-surface p-6">
+      <PhoneOtpVerification @login-success="onSocialSuccess" @needs-registration="onNeedsRegistration" />
+    </div>
+
     <div v-if="showSocialLogin" class="flex items-center gap-3 my-6">
       <div class="flex-1 h-px bg-line" />
       <span class="text-xs text-muted">ឬ</span>
@@ -62,6 +85,7 @@ import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
+import { usePendingPhoneVerification } from '~/composables/usePendingPhoneVerification'
 
 useSeoMeta({ title: 'ចូលគណនី | BubbleWhite' })
 
@@ -71,6 +95,9 @@ const api = useCustomerApi()
 const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
+const pendingVerification = usePendingPhoneVerification()
+
+const method = ref('password')
 
 // Only shown when at least one provider is actually configured — an admin
 // who hasn't set up Google/Facebook yet sees a normal phone/password form
@@ -82,10 +109,10 @@ const form = reactive({ identifier: '', password: '' })
 const loading = ref(false)
 const error = ref('')
 
-// Shared by both social buttons — same post-login steps as the regular
-// phone/password submit() below (pull in the customer's saved cart, then
-// redirect), since the backend already returns the identical {token,
-// customer} shape regardless of how they signed in.
+// Shared by social buttons and OTP login — same post-login steps as the
+// regular phone/password submit() below (pull in the customer's saved
+// cart, then redirect), since the backend already returns the identical
+// {token, customer} shape regardless of how they signed in.
 async function onSocialSuccess({ token, customer }) {
   error.value = ''
   setSession(token, customer)
@@ -96,6 +123,16 @@ async function onSocialSuccess({ token, customer }) {
 
 function onSocialError(message) {
   error.value = message
+}
+
+// OTP verification succeeded on THIS page, but no account exists for
+// that phone yet — hand the already-verified phone + token off to the
+// register page rather than making the customer verify all over again
+// (see usePendingPhoneVerification's own comment for why this is
+// in-memory only, not a query param).
+function onNeedsRegistration({ phone, verificationToken }) {
+  pendingVerification.value = { phone, verificationToken }
+  router.push({ path: '/register', query: route.query })
 }
 
 async function submit() {

@@ -6,9 +6,12 @@
     <AccountTabs />
 
     <div class="card-surface p-6">
-      <p class="font-semibold mb-4">ប្តូរពាក្យសម្ងាត់</p>
+      <p class="font-semibold mb-4">{{ hasPassword ? 'ប្តូរពាក្យសម្ងាត់' : 'កំណត់ពាក្យសម្ងាត់' }}</p>
+      <p v-if="!hasPassword" class="text-sm text-muted mb-4">
+        គណនីរបស់អ្នកបានចូលតាម Google ឬ Facebook ហើយមិនទាន់មានពាក្យសម្ងាត់នៅឡើយទេ។ អ្នកអាចកំណត់មួយនៅទីនេះ ដើម្បីអាចចូលគណនីដោយប្រើលេខទូរស័ព្ទ/អ៊ីមែលផងដែរ។
+      </p>
       <form class="space-y-4" @submit.prevent="submitPassword">
-        <div>
+        <div v-if="hasPassword">
           <FormLabel text="ពាក្យសម្ងាត់បច្ចុប្បន្ន" required for-id="current-password" />
           <input
             id="current-password"
@@ -33,11 +36,11 @@
         </div>
 
         <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
-        <p v-if="passwordSaved" class="text-sm text-rust">បានប្តូរពាក្យសម្ងាត់រួចរាល់។</p>
+        <p v-if="passwordSaved" class="text-sm text-rust">{{ hasPassword ? 'បានប្តូរពាក្យសម្ងាត់រួចរាល់។' : 'បានកំណត់ពាក្យសម្ងាត់រួចរាល់។' }}</p>
 
         <button type="submit" class="btn-primary" :disabled="savingPassword">
           <Loader2 v-if="savingPassword" :size="16" class="animate-spin" />
-          {{ savingPassword ? 'កំពុងរក្សាទុក…' : 'ប្តូរពាក្យសម្ងាត់' }}
+          {{ savingPassword ? 'កំពុងរក្សាទុក…' : hasPassword ? 'ប្តូរពាក្យសម្ងាត់' : 'កំណត់ពាក្យសម្ងាត់' }}
         </button>
       </form>
     </div>
@@ -45,7 +48,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
@@ -62,6 +65,13 @@ onMounted(() => {
     router.push({ path: '/login', query: { redirect: '/account/change-password' } })
   }
 })
+
+// A Google/Facebook-only customer has no existing password (see the
+// backend's customerJSON, which is what populates this) — asking them for
+// a "current password" they were never given the chance to set would
+// block them from ever setting one at all, which is exactly why this form
+// adapts instead of always requiring it.
+const hasPassword = computed(() => state.customer?.hasPassword !== false)
 
 const passwordForm = reactive({ currentPassword: '', newPassword: '' })
 const savingPassword = ref(false)

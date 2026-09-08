@@ -3,7 +3,21 @@
     <h1 class="font-sans font-bold text-2xl mb-1 text-center">បង្កើតគណនី</h1>
     <p class="text-sm text-muted text-center mb-8">ចូលរួមជាមួយ BubbleWhite</p>
 
-    <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
+    <!-- Step 1: phone must be verified before anything else — OTP
+         verification is required for every new account now, not
+         optional (see the backend's own registerInput.VerificationToken,
+         which Register rejects the request without). -->
+    <div v-if="!verified" class="card-surface p-6">
+      <p class="text-sm text-muted mb-4">សូមផ្ទៀងផ្ទាត់លេខទូរស័ព្ទរបស់អ្នកជាមុនសិន</p>
+      <PhoneOtpVerification @login-success="onAlreadyRegistered" @needs-registration="onVerified" />
+    </div>
+
+    <!-- Step 2: phone confirmed, collect the rest -->
+    <form v-else class="card-surface p-6 space-y-4" @submit.prevent="submit">
+      <div>
+        <FormLabel text="លេខទូរស័ព្ទ" for-id="reg-phone-confirmed" />
+        <input id="reg-phone-confirmed" type="tel" disabled :value="verifiedPhone" class="input-field text-sm bg-cream-dark" />
+      </div>
       <div>
         <FormLabel text="ឈ្មោះពេញ" required for-id="reg-name" />
         <input
@@ -18,17 +32,16 @@
         <FieldError :message="fieldErrors.name" />
       </div>
       <div>
-        <FormLabel text="លេខទូរស័ព្ទ" required for-id="reg-phone" />
+        <FormLabel text="អ៊ីមែល (ស្រេចចិត្ត)" for-id="reg-email" />
         <input
-          id="reg-phone"
-          v-model="form.phone"
-          type="tel"
-          required
-          autocomplete="tel"
+          id="reg-email"
+          v-model="form.email"
+          type="email"
+          autocomplete="email"
           class="input-field text-sm"
-          :class="fieldErrors.phone ? 'border-red-400' : ''"
+          :class="fieldErrors.email ? 'border-red-400' : ''"
         />
-        <FieldError :message="fieldErrors.phone" />
+        <FieldError :message="fieldErrors.email" />
       </div>
       <div>
         <FormLabel text="ពាក្យសម្ងាត់" required for-id="reg-password" />
@@ -60,8 +73,8 @@
     </div>
 
     <div v-if="showSocialLogin" class="flex items-center justify-center gap-4">
-      <GoogleSignInButton @success="onSocialSuccess" @error="onSocialError" />
-      <FacebookSignInButton @success="onSocialSuccess" @error="onSocialError" />
+      <GoogleSignInButton @success="onAlreadyRegistered" @error="onSocialError" />
+      <FacebookSignInButton @success="onAlreadyRegistered" @error="onSocialError" />
     </div>
 
     <p class="text-sm text-muted text-center mt-6">
@@ -72,12 +85,13 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
 import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
+import { usePendingPhoneVerification } from '~/composables/usePendingPhoneVerification'
 
 useSeoMeta({ title: 'បង្កើតគណនី | BubbleWhite' })
 
@@ -87,21 +101,41 @@ const api = useCustomerApi()
 const { setSession } = useCustomerAuth()
 const { fetchCart } = useCart()
 const { fieldErrors, setFromError, clear: clearFieldError } = useFieldErrors()
+const pendingVerification = usePendingPhoneVerification()
 
 // Same reasoning as login.vue: only shown when a provider is actually
 // configured.
 const config = useRuntimeConfig()
 const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
 
-const form = reactive({ name: '', phone: '', password: '' })
+const verified = ref(false)
+const verifiedPhone = ref('')
+const verificationToken = ref('')
+
+const form = reactive({ name: '', email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
 
-// A Google/Facebook signup on this page does the exact same "find or
-// create" the backend already does for a returning customer — there's
-// nothing register-specific about the social flow, so this is identical
-// to login.vue's own onSocialSuccess.
-async function onSocialSuccess({ token, customer }) {
+// A customer who already verified their phone on the LOGIN page (and
+// turned out to have no account) arrives here with that work already
+// done — skip straight to step 2 instead of asking them to verify twice.
+onMounted(() => {
+  if (pendingVerification.value) {
+    onVerified(pendingVerification.value)
+    pendingVerification.value = null
+  }
+})
+
+function onVerified({ phone, verificationToken: token }) {
+  verifiedPhone.value = phone
+  verificationToken.value = token
+  verified.value = true
+}
+
+// The phone they just verified already has an account (Google/Facebook
+// signups land here too) — nothing left to register, just log them in.
+// Same {token, customer} shape as every other login path.
+async function onAlreadyRegistered({ token, customer }) {
   error.value = ''
   setSession(token, customer)
   await fetchCart()
@@ -118,7 +152,13 @@ async function submit() {
   clearFieldError()
   loading.value = true
   try {
-    const res = await api.post('/customer/register', form)
+    const res = await api.post('/customer/register', {
+      name: form.name,
+      phone: verifiedPhone.value,
+      email: form.email,
+      password: form.password,
+      verificationToken: verificationToken.value,
+    })
     setSession(res.data.token, res.data.customer)
     await fetchCart()
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/account'
