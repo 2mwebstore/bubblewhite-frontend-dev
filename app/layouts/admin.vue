@@ -91,7 +91,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import {
   LayoutDashboard, Package, Tags, Images, Users, ShieldCheck, Settings as SettingsIcon, Mail, LogOut, Menu, X, UserCircle,
-  ShoppingBag, Contact, CreditCard, ChevronDown,
+  ShoppingBag, Contact, CreditCard, ChevronDown, History,
 } from 'lucide-vue-next'
 import AdminNavLink from '../components/admin/AdminNavLink.vue'
 import { useAuth } from '../composables/useAuth'
@@ -129,6 +129,8 @@ const nav = [
       { to: '/admin/users', label: 'អ្នកប្រើប្រាស់', icon: Users, permission: 'user.view' },
       { to: '/admin/roles', label: 'តួនាទី & សិទ្ធិ', icon: ShieldCheck, permission: 'role.view' },
       { to: '/admin/settings', label: 'ការកំណត់ក្រុមហ៊ុន', icon: SettingsIcon, permission: 'settings.view' },
+      { to: '/admin/audit-logs/staff', label: 'កំណត់ហេតុបុគ្គលិក', icon: History, permission: 'audit.view' },
+      { to: '/admin/audit-logs/customers', label: 'កំណត់ហេតុអតិថិជន', icon: History, permission: 'audit.view' },
     ],
   },
 ]

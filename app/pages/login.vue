@@ -130,8 +130,14 @@ function onSocialError(message) {
 // register page rather than making the customer verify all over again
 // (see usePendingPhoneVerification's own comment for why this is
 // in-memory only, not a query param).
-function onNeedsRegistration({ phone, verificationToken }) {
-  pendingVerification.value = { phone, verificationToken }
+// OTP verification succeeded on THIS page, but no account exists for
+// that phone yet — hand the phone number off to the register page so it
+// arrives pre-filled (see usePendingPhoneVerification's own comment for
+// why this is in-memory only, and why it's just the phone, not a trusted
+// verification result — registration still runs its own full
+// verification from scratch).
+function onNeedsRegistration({ phone }) {
+  pendingVerification.value = phone
   router.push({ path: '/register', query: route.query })
 }
 
