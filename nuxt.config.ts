@@ -44,6 +44,15 @@ export default defineNuxtConfig({
         },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        // Google's Sign-In button (GoogleSignInButton.vue) only starts
+        // loading its script once that component actually mounts — by
+        // then, the DNS lookup + TLS handshake to accounts.google.com
+        // hasn't even started yet, so the icon visibly pops in late on
+        // login/register. This preconnect lets the browser do that
+        // connection setup in parallel with the rest of the page instead
+        // of only starting once the component asks for the script,
+        // which is what was making it look slow to appear.
+        { rel: 'preconnect', href: 'https://accounts.google.com' },
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap',

@@ -33,18 +33,6 @@
         <FieldError :message="fieldErrors.phone" />
       </div>
       <div>
-        <FormLabel text="អ៊ីមែល (ស្រេចចិត្ត)" for-id="reg-email" />
-        <input
-          id="reg-email"
-          v-model="form.email"
-          type="email"
-          autocomplete="email"
-          class="input-field text-sm"
-          :class="fieldErrors.email ? 'border-red-400' : ''"
-        />
-        <FieldError :message="fieldErrors.email" />
-      </div>
-      <div>
         <FormLabel text="ពាក្យសម្ងាត់" required for-id="reg-password" />
         <input
           id="reg-password"
@@ -124,7 +112,7 @@ const pendingPhone = usePendingPhoneVerification()
 const config = useRuntimeConfig()
 const showSocialLogin = computed(() => !!(config.public.googleClientId || config.public.facebookAppId))
 
-const form = reactive({ name: '', phone: '', email: '', password: '' })
+const form = reactive({ name: '', phone: '', password: '' })
 const otpSent = ref(false)
 const channel = ref('')
 const telegramLinkUrl = ref('')
@@ -163,7 +151,7 @@ async function submit() {
   clearFieldError()
   loading.value = true
   try {
-    const res = await registerRequestOTP(form.name, form.phone, form.email, form.password)
+    const res = await registerRequestOTP(form.name, form.phone, '', form.password)
     channel.value = res.data.channel
     telegramLinkUrl.value = res.data.telegramLinkUrl || ''
     otpSent.value = true
