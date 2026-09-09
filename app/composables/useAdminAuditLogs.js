@@ -47,8 +47,19 @@ export function useAdminAuditLogs() {
     return api.del(`/admin/audit-logs/customers?keep=${encodeURIComponent(preset)}`)
   }
 
+  // Checkbox-based "delete these specific rows" — distinct from the
+  // preset-based cleanup above.
+  function deleteSelectedStaffLogs(ids) {
+    return api.post('/admin/audit-logs/staff/delete-selected', { ids })
+  }
+
+  function deleteSelectedCustomerLogs(ids) {
+    return api.post('/admin/audit-logs/customers/delete-selected', { ids })
+  }
+
   return {
     listStaffLogs, listCustomerLogs, staffFilterOptions, customerFilterOptions,
     cleanupStaffLogs, cleanupCustomerLogs,
+    deleteSelectedStaffLogs, deleteSelectedCustomerLogs,
   }
 }

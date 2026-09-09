@@ -20,13 +20,9 @@
         <FormLabel text="ធនធាន" />
         <SearchableSelect v-model="resourceFilter" :options="resourceOptions" :clearable="false" :searchable="false" class="sm:w-40" />
       </div>
-      <div class="sm:w-48">
-        <FormLabel text="ចាប់ពី" for-id="audit-date-from" />
-        <input id="audit-date-from" v-model="dateFrom" type="datetime-local" class="input-field text-sm" />
-      </div>
-      <div class="sm:w-48">
-        <FormLabel text="ដល់" for-id="audit-date-to" />
-        <input id="audit-date-to" v-model="dateTo" type="datetime-local" class="input-field text-sm" />
+      <div>
+        <FormLabel text="កាលបរិច្ឆេទ" />
+        <DateRangePicker v-model="dateRange" placeholder="ជ្រើសរើសចន្លោះកាលបរិច្ឆេទ…" />
       </div>
       <div class="sm:w-32">
         <FormLabel text="ចំនួន/ទំព័រ" />
@@ -56,6 +52,21 @@
       <p v-if="cleanupMessage" class="text-xs" :class="cleanupError ? 'text-red-600' : 'text-rust'">{{ cleanupMessage }}</p>
     </div>
 
+    <!-- Selection toolbar — only shown once at least one row is checked. -->
+    <div v-if="selectedIds.size" class="flex items-center gap-3 mb-3 p-3 rounded-card bg-red-50 border border-red-200">
+      <p class="text-sm text-red-700">បានជ្រើសរើស {{ selectedIds.size }} កំណត់ហេតុ</p>
+      <button
+        type="button"
+        class="text-sm text-white bg-red-600 rounded-lg px-3 py-1.5 hover:bg-red-700 disabled:opacity-60 inline-flex items-center gap-2"
+        :disabled="deletingSelected"
+        @click="runDeleteSelected"
+      >
+        <Loader2 v-if="deletingSelected" :size="14" class="animate-spin" />
+        {{ deletingSelected ? 'កំពុងលុប…' : 'លុបដែលបានជ្រើសរើស' }}
+      </button>
+      <button type="button" class="text-sm text-muted hover:underline" @click="selectedIds.clear()">លុបការជ្រើសរើស</button>
+    </div>
+
     <div v-if="loading" class="space-y-2">
       <div v-for="n in 6" :key="n" class="h-14 rounded-card bg-cream-dark animate-pulse" />
     </div>
@@ -64,17 +75,23 @@
       <table class="w-full text-sm">
         <thead class="bg-cream-dark text-xs uppercase tracking-wide text-muted">
           <tr>
+            <th class="px-4 py-3 w-10">
+              <input type="checkbox" :checked="allOnPageSelected" @change="toggleSelectAll" />
+            </th>
             <th class="text-left px-4 py-3">ថ្ងៃ ម៉ោង</th>
             <th class="text-left px-4 py-3">អ្នកធ្វើសកម្មភាព</th>
             <th class="text-left px-4 py-3">សកម្មភាព</th>
             <th class="text-left px-4 py-3 hidden md:table-cell">ធនធាន</th>
             <th class="text-left px-4 py-3 hidden lg:table-cell">ការពិពណ៌នា</th>
-            <th class="text-left px-4 py-3 hidden xl:table-cell">IP</th>
+            <th class="text-left px-4 py-3 hidden xl:table-cell">IP / ប្រទេស</th>
             <th class="text-left px-4 py-3 hidden 2xl:table-cell">ឧបករណ៍</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-line">
-          <tr v-for="log in logs" :key="log.id" class="hover:bg-cream-dark/50">
+          <tr v-for="log in logs" :key="log.id" class="hover:bg-cream-dark/50" :class="selectedIds.has(log.id) ? 'bg-red-50/50' : ''">
+            <td class="px-4 py-3">
+              <input type="checkbox" :checked="selectedIds.has(log.id)" @change="toggleOne(log.id)" />
+            </td>
             <td class="px-4 py-3 text-muted whitespace-nowrap">{{ formatDateTime(log.createdAt) }}</td>
             <td class="px-4 py-3 font-medium">{{ log.actorName || `#${log.actorId}` }}</td>
             <td class="px-4 py-3">
@@ -84,7 +101,14 @@
               {{ log.resource }}<span v-if="log.resourceLabel"> — {{ log.resourceLabel }}</span>
             </td>
             <td class="px-4 py-3 hidden lg:table-cell text-muted">{{ log.description }}</td>
-            <td class="px-4 py-3 hidden xl:table-cell text-muted whitespace-nowrap">{{ log.ipAddress }}</td>
+            <td class="px-4 py-3 hidden xl:table-cell text-muted whitespace-nowrap">
+              <div>{{ log.ipAddress }}</div>
+              <div v-if="log.country || log.isVpn || log.isProxy" class="flex items-center gap-1 mt-0.5">
+                <span v-if="log.country" class="text-[10px] text-muted">{{ log.country }}</span>
+                <span v-if="log.isVpn" class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">VPN</span>
+                <span v-if="log.isProxy" class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700">Proxy</span>
+              </div>
+            </td>
             <td class="px-4 py-3 hidden 2xl:table-cell text-muted whitespace-nowrap" :title="log.userAgent">{{ parseUserAgent(log.userAgent) }}</td>
           </tr>
         </tbody>
@@ -104,15 +128,17 @@ import { formatOrderDateTime as formatDateTime } from '~/composables/useOrderDis
 import { parseUserAgent } from '~/composables/useUserAgentLabel'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
 import AdminPagination from '~/components/admin/AdminPagination.vue'
+import DateRangePicker from '~/components/admin/DateRangePicker.vue'
 
-// listFn/filterOptionsFn/cleanupFn are the three calls this table needs —
-// passed in rather than hardcoded, so this one component serves both the
-// staff and customer log views without duplicating the table/filter/
-// cleanup markup twice.
+// listFn/filterOptionsFn/cleanupFn/deleteSelectedFn are the four calls
+// this table needs — passed in rather than hardcoded, so this one
+// component serves both the staff and customer log views without
+// duplicating the table/filter/cleanup/delete markup twice.
 const props = defineProps({
   listFn: { type: Function, required: true },
   filterOptionsFn: { type: Function, required: true },
   cleanupFn: { type: Function, required: true },
+  deleteSelectedFn: { type: Function, required: true },
 })
 
 const logs = ref([])
@@ -123,8 +149,12 @@ const meta = ref({ page: 1, pageSize: 20, total: 0, totalPage: 1 })
 const search = ref('')
 const actionFilter = ref('')
 const resourceFilter = ref('')
-const dateFrom = ref('')
-const dateTo = ref('')
+// [from, to] as plain "YYYY-MM-DD" strings — see DateRangePicker.vue.
+// dateFrom/dateTo below are derived from this for the actual API calls,
+// since the backend filter still takes them as two separate values.
+const dateRange = ref(['', ''])
+const dateFrom = computed(() => dateRange.value[0] || '')
+const dateTo = computed(() => dateRange.value[1] || '')
 const pageSize = ref(20)
 
 const availableActions = ref([])
@@ -147,6 +177,28 @@ const retentionOptions = [
 const cleaningUp = ref(false)
 const cleanupMessage = ref('')
 const cleanupError = ref(false)
+
+// Checkbox-based multi-select — a plain Set of log IDs, cleared whenever
+// the page/filters change (a selection made on a since-replaced page of
+// results wouldn't mean anything once the underlying rows are gone).
+const selectedIds = ref(new Set())
+const deletingSelected = ref(false)
+const allOnPageSelected = computed(() => logs.value.length > 0 && logs.value.every((l) => selectedIds.value.has(l.id)))
+
+function toggleOne(id) {
+  const next = new Set(selectedIds.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  selectedIds.value = next
+}
+
+function toggleSelectAll() {
+  if (allOnPageSelected.value) {
+    selectedIds.value = new Set()
+  } else {
+    selectedIds.value = new Set(logs.value.map((l) => l.id))
+  }
+}
 
 const hasActiveFilters = computed(() => !!(search.value || actionFilter.value || resourceFilter.value || dateFrom.value || dateTo.value))
 
@@ -182,16 +234,21 @@ async function load() {
   }
 }
 
-watch(page, load)
-watch([actionFilter, resourceFilter, dateFrom, dateTo, pageSize], () => {
-  page.value = 1
+watch(page, () => {
+  selectedIds.value = new Set()
   load()
 })
+watch([actionFilter, resourceFilter, dateRange, pageSize], () => {
+  selectedIds.value = new Set()
+  page.value = 1
+  load()
+}, { deep: true })
 
 let searchDebounce = null
 watch(search, () => {
   clearTimeout(searchDebounce)
   searchDebounce = setTimeout(() => {
+    selectedIds.value = new Set()
     page.value = 1
     load()
   }, 350)
@@ -201,8 +258,7 @@ function resetFilters() {
   search.value = ''
   actionFilter.value = ''
   resourceFilter.value = ''
-  dateFrom.value = ''
-  dateTo.value = ''
+  dateRange.value = ['', '']
 }
 
 async function runCleanup() {
@@ -223,6 +279,24 @@ async function runCleanup() {
     cleanupMessage.value = e.message || 'មិនអាចលុបបានទេ'
   } finally {
     cleaningUp.value = false
+  }
+}
+
+async function runDeleteSelected() {
+  const ids = Array.from(selectedIds.value)
+  if (!ids.length) return
+  if (!confirm(`តើអ្នកប្រាកដទេ? នេះនឹងលុប ${ids.length} កំណត់ហេតុជាអចិន្ត្រៃយ៍។`)) {
+    return
+  }
+  deletingSelected.value = true
+  try {
+    await props.deleteSelectedFn(ids)
+    selectedIds.value = new Set()
+    await load()
+  } catch (e) {
+    alert(e.message || 'មិនអាចលុបបានទេ')
+  } finally {
+    deletingSelected.value = false
   }
 }
 

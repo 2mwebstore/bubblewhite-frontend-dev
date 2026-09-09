@@ -91,12 +91,30 @@
           <label class="text-xs font-medium block mb-1">លេខសម្គាល់ក្រុម Telegram (Group ID)</label>
           <input v-model="form.backupTelegramGroupId" type="text" placeholder="-1001234567890" class="input-field text-sm" />
         </div>
+        <div class="max-w-xs mt-3">
+          <label class="text-xs font-medium block mb-1">Telegram Bot Token (សម្រាប់ការបម្រុងទុកតែម្នាក់ឯង)</label>
+          <input v-model="form.backupTelegramBotToken" type="text" placeholder="123456789:AAExample-bot-token" class="input-field text-sm" autocomplete="off" />
+          <p class="text-xs text-muted mt-1">ប្រើ bot ដាច់ដោយឡែកសម្រាប់តែការបម្រុងទុក ដើម្បីជៀសវាងបញ្ហាទាក់ទងនឹង webhook របស់ bot ចម្បង។ ទុកទំនេរដើម្បីប្រើ bot ចម្បង។</p>
+        </div>
         <button type="button" class="btn-secondary mt-3 text-sm inline-flex items-center gap-2" :disabled="backingUp" @click="runBackupNow">
           <Loader2 v-if="backingUp" :size="14" class="animate-spin" />
           {{ backingUp ? 'កំពុងបម្រុងទុក…' : 'បម្រុងទុកឥឡូវនេះ' }}
         </button>
         <p class="text-xs text-muted mt-1">ប្រើលេខសម្គាល់ក្រុមដែល <strong>បានរក្សាទុករួច</strong> — សូមចុច "រក្សាទុក" ខាងក្រោមជាមុនសិន បើទើបតែផ្លាស់ប្តូរ។</p>
         <p v-if="backupMessage" class="text-xs mt-2" :class="backupError ? 'text-red-600' : 'text-rust'">{{ backupMessage }}</p>
+      </div>
+
+      <div class="border-t border-line pt-6">
+        <p class="text-sm font-semibold mb-1">ព័ត៌មាន IP (ប្រទេស, VPN, Proxy)</p>
+        <p class="text-xs text-muted mb-3">
+          ប្រើសម្រាប់បង្ហាញប្រទេស និងស្វែងរក VPN/Proxy នៅក្នុងកំណត់ហេតុសកម្មភាព។
+          ចុះឈ្មោះឥតគិតថ្លៃនៅ <a href="https://www.iplocate.io" target="_blank" rel="noopener" class="text-rust hover:underline">iplocate.io</a> (១.០០០ ការស្វែងរក/ថ្ងៃ ឥតគិតថ្លៃ)។
+          ទុកទំនេរដើម្បីមិនប្រើមុខងារនេះ។
+        </p>
+        <div class="max-w-xs">
+          <label class="text-xs font-medium block mb-1">IPLocate API Key</label>
+          <input v-model="form.ipIntelligenceApiKey" type="text" placeholder="ស្រេចចិត្ត" class="input-field text-sm" autocomplete="off" />
+        </div>
       </div>
 
       <div>
@@ -157,6 +175,8 @@ const form = reactive({
   latitude: 0, longitude: 0, deliveryDistanceKm: 0,
   shippingFee: 0,
   backupTelegramGroupId: '',
+  backupTelegramBotToken: '',
+  ipIntelligenceApiKey: '',
 })
 
 // Phnom Penh center — used only when no location has been saved yet
