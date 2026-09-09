@@ -29,6 +29,15 @@
           <span class="text-muted">អ៊ីមែល</span>
           <span class="font-medium">{{ customer.email || '—' }}</span>
         </div>
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-muted">ចុះឈ្មោះតាម</span>
+          <span>
+            <span v-for="p in customer.authProviders" :key="p" class="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-1" :class="authProviderClass(p)">
+              {{ authProviderLabel(p) }}
+            </span>
+            <span v-if="!customer.authProviders?.length" class="text-muted">—</span>
+          </span>
+        </div>
       </div>
 
       <div v-if="hasPermission('customer.manage')" class="card-surface p-4 mb-6 flex flex-wrap items-center gap-3">
@@ -101,6 +110,7 @@ import { ChevronLeft, KeyRound } from 'lucide-vue-next'
 import { useAdminCustomers } from '~/composables/useAdminCustomers'
 import { useAuth } from '~/composables/useAuth'
 import { useStore } from '~/composables/useStore'
+import { authProviderLabel, authProviderClass } from '~/composables/useAuthProviderLabel'
 
 const route = useRoute()
 const { getCustomer, getCustomerOrders, resetCustomerPassword, setCustomerActive } = useAdminCustomers()

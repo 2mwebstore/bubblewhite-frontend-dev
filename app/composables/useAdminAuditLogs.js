@@ -36,5 +36,19 @@ export function useAdminAuditLogs() {
     return api.get('/admin/audit-logs/customers/filters')
   }
 
-  return { listStaffLogs, listCustomerLogs, staffFilterOptions, customerFilterOptions }
+  // preset is one of 'this_month' | 'last_month' | '3_months' | '5_months'
+  // — see the backend's own AuditLogService.retentionCutoff for exactly
+  // what cutoff date each one computes.
+  function cleanupStaffLogs(preset) {
+    return api.del(`/admin/audit-logs/staff?keep=${encodeURIComponent(preset)}`)
+  }
+
+  function cleanupCustomerLogs(preset) {
+    return api.del(`/admin/audit-logs/customers?keep=${encodeURIComponent(preset)}`)
+  }
+
+  return {
+    listStaffLogs, listCustomerLogs, staffFilterOptions, customerFilterOptions,
+    cleanupStaffLogs, cleanupCustomerLogs,
+  }
 }

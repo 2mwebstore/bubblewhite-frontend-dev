@@ -13,6 +13,7 @@
             <th class="text-left px-4 py-3">ឈ្មោះ</th>
             <th class="text-left px-4 py-3 hidden sm:table-cell">លេខទូរស័ព្ទ</th>
             <th class="text-left px-4 py-3 hidden md:table-cell">អ៊ីមែល</th>
+            <th class="text-left px-4 py-3 hidden lg:table-cell">ចុះឈ្មោះតាម</th>
             <th class="text-left px-4 py-3">ស្ថានភាព</th>
             <th class="px-4 py-3"></th>
           </tr>
@@ -24,6 +25,12 @@
             </td>
             <td class="px-4 py-3 hidden sm:table-cell text-muted">{{ cust.phone }}</td>
             <td class="px-4 py-3 hidden md:table-cell text-muted">{{ cust.email || '—' }}</td>
+            <td class="px-4 py-3 hidden lg:table-cell">
+              <span v-for="p in cust.authProviders" :key="p" class="text-[10px] font-semibold px-2 py-0.5 rounded-full mr-1" :class="authProviderClass(p)">
+                {{ authProviderLabel(p) }}
+              </span>
+              <span v-if="!cust.authProviders?.length" class="text-muted text-xs">—</span>
+            </td>
             <td class="px-4 py-3">
               <button
                 type="button"
@@ -89,6 +96,7 @@ import { ref, watch, onMounted } from 'vue'
 import { KeyRound } from 'lucide-vue-next'
 import { useAdminCustomers } from '~/composables/useAdminCustomers'
 import { useStore } from '~/composables/useStore'
+import { authProviderLabel, authProviderClass } from '~/composables/useAuthProviderLabel'
 import AdminPagination from '~/components/admin/AdminPagination.vue'
 
 const { listCustomers, resetCustomerPassword, setCustomerActive } = useAdminCustomers()
