@@ -23,12 +23,14 @@
         <FormLabel text="លេខទូរស័ព្ទ" required for-id="reg-phone" />
         <input
           id="reg-phone"
-          v-model="form.phone"
+          :value="form.phone"
           type="tel"
           required
           autocomplete="tel"
+          inputmode="tel"
           class="input-field text-sm"
           :class="fieldErrors.phone ? 'border-red-400' : ''"
+          @input="form.phone = sanitizePhoneInput($event.target.value)"
         />
         <FieldError :message="fieldErrors.phone" />
       </div>
@@ -96,6 +98,7 @@ import { useCart } from '~/composables/useCart'
 import { useFieldErrors } from '~/composables/useFieldErrors'
 import { useOtpAuth } from '~/composables/useOtpAuth'
 import { usePendingPhoneVerification } from '~/composables/usePendingPhoneVerification'
+import { sanitizePhoneInput } from '~/composables/usePhoneInput'
 
 useSeoMeta({ title: 'បង្កើតគណនី | BubbleWhite' })
 

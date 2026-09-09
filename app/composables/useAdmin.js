@@ -138,6 +138,9 @@ export function useAdmin() {
   async function updateSettings(payload) {
     return (await api.put('/admin/settings', payload)).data
   }
+  async function runBackupNow() {
+    return (await api.post('/admin/settings/backup/run')).data
+  }
   async function uploadSiteImage(file) {
     return (await api.upload('/admin/uploads/site', file)).data
   }
@@ -173,7 +176,7 @@ export function useAdmin() {
     listUsers, createUser, updateUser, deleteUser, assignRole, resetUserPassword,
     listRoles, listPermissions, createRole, updateRole, deleteRole,
     listContacts, markContactRead, deleteContact,
-    getSettings, updateSettings, uploadSiteImage, deleteSiteImage,
+    getSettings, updateSettings, uploadSiteImage, deleteSiteImage, runBackupNow,
     listBanners, createBanner, updateBanner, deleteBanner, uploadBannerImage, deleteBannerImage,
   }
 }

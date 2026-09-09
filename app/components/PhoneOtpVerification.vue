@@ -5,12 +5,14 @@
       <FormLabel text="លេខទូរស័ព្ទ" required for-id="otp-login-phone" />
       <input
         id="otp-login-phone"
-        v-model="phone"
+        :value="phone"
         type="tel"
         required
         autocomplete="tel"
+        inputmode="tel"
         class="input-field text-sm"
         :class="error ? 'border-red-400' : ''"
+        @input="phone = sanitizePhoneInput($event.target.value)"
       />
       <FieldError :message="error" />
       <button type="button" class="btn-primary w-full mt-3" :disabled="loading || !phone" @click="requestCode">
@@ -35,6 +37,7 @@
 import { ref } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useOtpAuth } from '~/composables/useOtpAuth'
+import { sanitizePhoneInput } from '~/composables/usePhoneInput'
 
 const emit = defineEmits(['login-success', 'needs-registration', 'error'])
 

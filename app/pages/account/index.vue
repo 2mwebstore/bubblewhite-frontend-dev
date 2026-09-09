@@ -14,7 +14,15 @@
         </div>
         <div>
           <FormLabel text="លេខទូរស័ព្ទ" required for-id="profile-phone" />
-          <input id="profile-phone" v-model="profileForm.phone" type="tel" required class="input-field text-sm" />
+          <input
+            id="profile-phone"
+            :value="profileForm.phone"
+            type="tel"
+            required
+            inputmode="tel"
+            class="input-field text-sm"
+            @input="profileForm.phone = sanitizePhoneInput($event.target.value)"
+          />
         </div>
         <div>
           <FormLabel text="អ៊ីមែល (ស្រេចចិត្ត)" for-id="profile-email" />
@@ -38,6 +46,7 @@ import { reactive, ref, onMounted } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import { useCustomerApi } from '~/composables/useCustomerApi'
 import { useCustomerAuth } from '~/composables/useCustomerAuth'
+import { sanitizePhoneInput } from '~/composables/usePhoneInput'
 
 useSeoMeta({ title: 'គណនីរបស់ខ្ញុំ | BubbleWhite' })
 

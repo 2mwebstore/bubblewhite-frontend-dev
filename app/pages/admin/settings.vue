@@ -81,6 +81,24 @@
         </div>
       </div>
 
+      <div class="border-t border-line pt-6">
+        <p class="text-sm font-semibold mb-1">ការបម្រុងទុកមូលដ្ឋានទិន្នន័យ</p>
+        <p class="text-xs text-muted mb-3">
+          រាល់ថ្ងៃម៉ោង ១២ ថ្ងៃត្រង់ (ម៉ោងភ្នំពេញ) ប្រព័ន្ធនឹងផ្ញើឯកសារបម្រុងទុកទៅក្រុម Telegram ខាងក្រោមដោយស្វ័យប្រវត្តិ។
+          ទុកទំនេរបើមិនចង់ឱ្យផ្ញើ។
+        </p>
+        <div class="max-w-xs">
+          <label class="text-xs font-medium block mb-1">លេខសម្គាល់ក្រុម Telegram (Group ID)</label>
+          <input v-model="form.backupTelegramGroupId" type="text" placeholder="-1001234567890" class="input-field text-sm" />
+        </div>
+        <button type="button" class="btn-secondary mt-3 text-sm inline-flex items-center gap-2" :disabled="backingUp" @click="runBackupNow">
+          <Loader2 v-if="backingUp" :size="14" class="animate-spin" />
+          {{ backingUp ? 'កំពុងបម្រុងទុក…' : 'បម្រុងទុកឥឡូវនេះ' }}
+        </button>
+        <p class="text-xs text-muted mt-1">ប្រើលេខសម្គាល់ក្រុមដែល <strong>បានរក្សាទុករួច</strong> — សូមចុច "រក្សាទុក" ខាងក្រោមជាមុនសិន បើទើបតែផ្លាស់ប្តូរ។</p>
+        <p v-if="backupMessage" class="text-xs mt-2" :class="backupError ? 'text-red-600' : 'text-rust'">{{ backupMessage }}</p>
+      </div>
+
       <div>
         <p class="text-xs font-medium mb-2">បណ្តាញសង្គម</p>
         <div class="grid sm:grid-cols-2 gap-4">
@@ -119,7 +137,7 @@ import { useAdmin } from '~/composables/useAdmin'
 import { keyFromUrl } from '~/composables/useImageKey'
 import 'leaflet/dist/leaflet.css'
 
-const { getSettings, updateSettings, uploadSiteImage, deleteSiteImage } = useAdmin()
+const { getSettings, updateSettings, uploadSiteImage, deleteSiteImage, runBackupNow: runBackupNowApi } = useAdmin()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -138,6 +156,7 @@ const form = reactive({
   logoUrl: '',
   latitude: 0, longitude: 0, deliveryDistanceKm: 0,
   shippingFee: 0,
+  backupTelegramGroupId: '',
 })
 
 // Phnom Penh center — used only when no location has been saved yet
@@ -276,6 +295,31 @@ async function submit() {
     error.value = e.message || 'មិនអាចរក្សាទុកបានទេ'
   } finally {
     saving.value = false
+  }
+}
+
+const backingUp = ref(false)
+const backupMessage = ref('')
+const backupError = ref(false)
+
+// Uses whatever Telegram group ID is currently SAVED in the database —
+// not necessarily whatever's sitting in the form field right now, if the
+// admin just typed a new one without hitting the main "Save" button
+// above yet. Flagged in the template right next to this button rather
+// than silently saving unrelated form changes on their behalf just
+// because they clicked "Backup now".
+async function runBackupNow() {
+  backupMessage.value = ''
+  backupError.value = false
+  backingUp.value = true
+  try {
+    const res = await runBackupNowApi()
+    backupMessage.value = res.message || 'ការបម្រុងទុកបានផ្ញើទៅ Telegram ដោយជោគជ័យ'
+  } catch (e) {
+    backupError.value = true
+    backupMessage.value = e.message || 'មិនអាចបម្រុងទុកបានទេ'
+  } finally {
+    backingUp.value = false
   }
 }
 

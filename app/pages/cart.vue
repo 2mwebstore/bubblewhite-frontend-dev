@@ -104,11 +104,13 @@
               <FormLabel text="លេខទូរស័ព្ទទំនាក់ទំនង" required for-id="checkout-phone" />
               <input
                 id="checkout-phone"
-                v-model="phone"
+                :value="phone"
                 type="tel"
                 required
+                inputmode="tel"
                 class="input-field text-sm"
                 :class="fieldErrors.phone ? 'border-red-400' : ''"
+                @input="phone = sanitizePhoneInput($event.target.value)"
               />
               <p class="text-xs text-muted mt-1">លំនាំដើមគឺលេខទូរស័ព្ទគណនីរបស់អ្នក — អាចប្តូរបានសម្រាប់ការបញ្ជាទិញនេះ។</p>
               <FieldError :message="fieldErrors.phone" />
@@ -254,6 +256,7 @@ import { useSiteSettings } from '~/composables/useSiteSettings'
 import { paymentLabel, statusLabel, statusClass, formatOrderDate } from '~/composables/useOrderDisplay'
 import { usePaymentMethods } from '~/composables/usePaymentMethods'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
+import { sanitizePhoneInput } from '~/composables/usePhoneInput'
 
 useSeoMeta({ title: 'រទេះទំនិញ | BubbleWhite' })
 
