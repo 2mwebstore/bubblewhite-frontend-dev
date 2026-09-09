@@ -32,9 +32,9 @@
     </div>
 
     <!-- Cleanup: keep only the last N months, delete everything older.
-         A destructive, irreversible action — confirmed via a native
-         confirm() dialog before actually running, rather than a single
-         click doing it immediately. -->
+         A destructive, irreversible action — confirmed via ConfirmDialog
+         before actually running, rather than a single click doing it
+         immediately. -->
     <div class="flex flex-wrap items-end gap-3 mb-6 p-3 rounded-card bg-cream-dark/50 border border-line">
       <div class="sm:w-48">
         <FormLabel text="សម្អាតកំណត់ហេតុចាស់" />
@@ -44,7 +44,7 @@
         type="button"
         class="text-sm text-red-600 border border-red-300 rounded-lg px-3 py-2 hover:bg-red-50 disabled:opacity-60 inline-flex items-center gap-2"
         :disabled="cleaningUp"
-        @click="runCleanup"
+        @click="confirmingCleanup = true"
       >
         <Loader2 v-if="cleaningUp" :size="14" class="animate-spin" />
         {{ cleaningUp ? 'កំពុងលុប…' : 'លុបកំណត់ហេតុចាស់' }}
@@ -59,12 +59,13 @@
         type="button"
         class="text-sm text-white bg-red-600 rounded-lg px-3 py-1.5 hover:bg-red-700 disabled:opacity-60 inline-flex items-center gap-2"
         :disabled="deletingSelected"
-        @click="runDeleteSelected"
+        @click="confirmingDeleteSelected = true"
       >
         <Loader2 v-if="deletingSelected" :size="14" class="animate-spin" />
         {{ deletingSelected ? 'កំពុងលុប…' : 'លុបដែលបានជ្រើសរើស' }}
       </button>
       <button type="button" class="text-sm text-muted hover:underline" @click="selectedIds.clear()">លុបការជ្រើសរើស</button>
+      <p v-if="deleteSelectedMessage" class="text-xs" :class="deleteSelectedError ? 'text-red-600' : 'text-rust'">{{ deleteSelectedMessage }}</p>
     </div>
 
     <div v-if="loading" class="space-y-2">
@@ -116,6 +117,21 @@
     <div v-else class="text-center py-16 border border-dashed border-line rounded-card">
       <p class="text-sm text-muted">{{ hasActiveFilters ? 'មិនមានកំណត់ហេតុត្រូវនឹងតម្រងរបស់អ្នកទេ។' : 'មិនមានកំណត់ហេតុនៅឡើយទេ។' }}</p>
     </div>
+
+    <ConfirmDialog
+      :open="confirmingCleanup"
+      title="លុបកំណត់ហេតុចាស់?"
+      :message="`សកម្មភាពនេះលុបជាអចិន្ត្រៃយ៍ គ្មានលទ្ធភាពត្រឡប់វិញ។ (${retentionLabel})`"
+      @cancel="confirmingCleanup = false"
+      @confirm="runCleanup"
+    />
+    <ConfirmDialog
+      :open="confirmingDeleteSelected"
+      title="លុបកំណត់ហេតុដែលបានជ្រើសរើស?"
+      :message="`នេះនឹងលុប ${selectedIds.size} កំណត់ហេតុជាអចិន្ត្រៃយ៍។`"
+      @cancel="confirmingDeleteSelected = false"
+      @confirm="runDeleteSelected"
+    />
   </div>
 </template>
 
@@ -127,6 +143,7 @@ import { parseUserAgent } from '~/composables/useUserAgentLabel'
 import SearchableSelect from '~/components/admin/SearchableSelect.vue'
 import AdminPagination from '~/components/admin/AdminPagination.vue'
 import DateRangePicker from '~/components/admin/DateRangePicker.vue'
+import ConfirmDialog from '~/components/admin/ConfirmDialog.vue'
 
 // listFn/filterOptionsFn/cleanupFn/deleteSelectedFn are the four calls
 // this table needs — passed in rather than hardcoded, so this one
@@ -172,6 +189,8 @@ const retentionOptions = [
   { value: '3_months', label: 'រក្សា ៣ ខែចុងក្រោយ' },
   { value: '5_months', label: 'រក្សា ៥ ខែចុងក្រោយ' },
 ]
+const retentionLabel = computed(() => retentionOptions.find((o) => o.value === retentionPreset.value)?.label || retentionPreset.value)
+const confirmingCleanup = ref(false)
 const cleaningUp = ref(false)
 const cleanupMessage = ref('')
 const cleanupError = ref(false)
@@ -180,7 +199,10 @@ const cleanupError = ref(false)
 // the page/filters change (a selection made on a since-replaced page of
 // results wouldn't mean anything once the underlying rows are gone).
 const selectedIds = ref(new Set())
+const confirmingDeleteSelected = ref(false)
 const deletingSelected = ref(false)
+const deleteSelectedMessage = ref('')
+const deleteSelectedError = ref(false)
 const allOnPageSelected = computed(() => logs.value.length > 0 && logs.value.every((l) => selectedIds.value.has(l.id)))
 
 function toggleOne(id) {
@@ -260,10 +282,7 @@ function resetFilters() {
 }
 
 async function runCleanup() {
-  const label = retentionOptions.find((o) => o.value === retentionPreset.value)?.label || retentionPreset.value
-  if (!confirm(`តើអ្នកប្រាកដទេ? សកម្មភាពនេះលុបជាអចិន្ត្រៃយ៍ គ្មានលទ្ធភាពត្រឡប់វិញ។\n\n"${label}"`)) {
-    return
-  }
+  confirmingCleanup.value = false
   cleanupMessage.value = ''
   cleanupError.value = false
   cleaningUp.value = true
@@ -281,18 +300,19 @@ async function runCleanup() {
 }
 
 async function runDeleteSelected() {
+  confirmingDeleteSelected.value = false
   const ids = Array.from(selectedIds.value)
   if (!ids.length) return
-  if (!confirm(`តើអ្នកប្រាកដទេ? នេះនឹងលុប ${ids.length} កំណត់ហេតុជាអចិន្ត្រៃយ៍។`)) {
-    return
-  }
+  deleteSelectedMessage.value = ''
+  deleteSelectedError.value = false
   deletingSelected.value = true
   try {
     await props.deleteSelectedFn(ids)
     selectedIds.value = new Set()
     await load()
   } catch (e) {
-    alert(e.message || 'មិនអាចលុបបានទេ')
+    deleteSelectedError.value = true
+    deleteSelectedMessage.value = e.message || 'មិនអាចលុបបានទេ'
   } finally {
     deletingSelected.value = false
   }
