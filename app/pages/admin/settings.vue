@@ -104,19 +104,6 @@
         <p v-if="backupMessage" class="text-xs mt-2" :class="backupError ? 'text-red-600' : 'text-rust'">{{ backupMessage }}</p>
       </div>
 
-      <div class="border-t border-line pt-6">
-        <p class="text-sm font-semibold mb-1">ព័ត៌មាន IP (ប្រទេស, VPN, Proxy)</p>
-        <p class="text-xs text-muted mb-3">
-          ប្រើសម្រាប់បង្ហាញប្រទេស និងស្វែងរក VPN/Proxy នៅក្នុងកំណត់ហេតុសកម្មភាព។
-          ចុះឈ្មោះឥតគិតថ្លៃនៅ <a href="https://www.iplocate.io" target="_blank" rel="noopener" class="text-rust hover:underline">iplocate.io</a> (១.០០០ ការស្វែងរក/ថ្ងៃ ឥតគិតថ្លៃ)។
-          ទុកទំនេរដើម្បីមិនប្រើមុខងារនេះ។
-        </p>
-        <div class="max-w-xs">
-          <label class="text-xs font-medium block mb-1">IPLocate API Key</label>
-          <input v-model="form.ipIntelligenceApiKey" type="text" placeholder="ស្រេចចិត្ត" class="input-field text-sm" autocomplete="off" />
-        </div>
-      </div>
-
       <div>
         <p class="text-xs font-medium mb-2">បណ្តាញសង្គម</p>
         <div class="grid sm:grid-cols-2 gap-4">
@@ -176,7 +163,6 @@ const form = reactive({
   shippingFee: 0,
   backupTelegramGroupId: '',
   backupTelegramBotToken: '',
-  ipIntelligenceApiKey: '',
 })
 
 // Phnom Penh center — used only when no location has been saved yet

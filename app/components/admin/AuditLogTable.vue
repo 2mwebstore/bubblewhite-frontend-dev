@@ -103,10 +103,8 @@
             <td class="px-4 py-3 hidden lg:table-cell text-muted">{{ log.description }}</td>
             <td class="px-4 py-3 hidden xl:table-cell text-muted whitespace-nowrap">
               <div>{{ log.ipAddress }}</div>
-              <div v-if="log.country || log.isVpn || log.isProxy" class="flex items-center gap-1 mt-0.5">
-                <span v-if="log.country" class="text-[10px] text-muted">{{ log.country }}</span>
-                <span v-if="log.isVpn" class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">VPN</span>
-                <span v-if="log.isProxy" class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700">Proxy</span>
+              <div v-if="log.country" class="mt-0.5">
+                <span class="text-[10px] text-muted">{{ log.country }}</span>
               </div>
             </td>
             <td class="px-4 py-3 hidden 2xl:table-cell text-muted whitespace-nowrap" :title="log.userAgent">{{ parseUserAgent(log.userAgent) }}</td>
