@@ -9,7 +9,7 @@
       <form class="card-surface p-6 space-y-4" @submit.prevent="submit">
         <div>
           <FormLabel text="អ៊ីមែល" required for-id="email" />
-          <input id="email" v-model="email" type="email" required autocomplete="username" class="input-field" placeholder="admin@bubblewhite.co" />
+          <input id="email" v-model="email" type="email" required autocomplete="username" class="input-field" />
         </div>
         <div>
           <FormLabel text="ពាក្យសម្ងាត់" required for-id="password" />
