@@ -1,0 +1,40 @@
+name: Frontend CI
+
+# Runs on every push and pull request. Does NOT deploy — Railway's own
+# GitHub integration handles that separately. This workflow's only job is
+# to catch a broken build before Railway does.
+#
+# IMPORTANT: this build has a real, verified hard dependency on five
+# static images existing at public/banners/ (about-hero.png,
+# story-rack.png, story-box.png, contact-hero.png, faq-flatlay.png) —
+# referenced via plain <img src="/banners/..."> tags in about.vue and
+# contact.vue, but Vite's asset resolution treats them as build-time
+# imports it must resolve. If any of these five files are missing from
+# the repo, this build (and Railway's deploy) will fail outright with an
+# "UNRESOLVED_IMPORT" error, not a runtime 404 the way a normal missing
+# image would. Confirmed directly, not assumed — if this workflow starts
+# failing with that error, this is why.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NUXT_PUBLIC_API_BASE_URL: https://placeholder.invalid/api
