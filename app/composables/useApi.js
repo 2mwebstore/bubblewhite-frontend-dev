@@ -1,4 +1,5 @@
 import { useAuth } from './useAuth'
+import { getRequestIP } from 'h3'
 
 /**
  * Thin wrapper around $fetch (Nuxt's ofetch, available identically during
@@ -13,6 +14,20 @@ import { useAuth } from './useAuth'
  * fetch actually happens during SSR and gets serialized into the page
  * payload — that's what makes the rendered HTML contain real content
  * instead of an empty shell.
+ *
+ * IMPORTANT — real client IP during SSR: when this runs server-side, the
+ * HTTP request that reaches the backend originates from THIS Nuxt server
+ * process, not the visitor's own browser — so without the block below,
+ * the backend would see every SSR-rendered page load as coming from the
+ * SAME IP (this server's), collapsing per-visitor rate limiting into one
+ * shared bucket for every customer. getRequestIP() reads the ORIGINAL
+ * incoming request's real IP (the actual visitor, correctly resolved by
+ * Nuxt from the X-Forwarded-For chain Railway's edge already set on the
+ * hop this server itself received), and forwards it explicitly on this
+ * server's own outbound call to the backend, authenticated by a shared
+ * secret so no arbitrary caller of the public backend API could spoof
+ * the same header — see nuxt.config.ts's internalProxySecret and the
+ * backend's config.InternalProxySecret for the full reasoning.
  */
 async function request(path, { method = 'GET', body, isForm = false } = {}) {
   const { state, logout } = useAuth()
@@ -21,6 +36,15 @@ async function request(path, { method = 'GET', body, isForm = false } = {}) {
 
   const headers = {}
   if (state.token) headers['Authorization'] = `Bearer ${state.token}`
+
+  if (import.meta.server && config.internalProxySecret) {
+    const event = useRequestEvent()
+    const clientIP = event ? getRequestIP(event, { xForwardedFor: true }) : null
+    if (clientIP) {
+      headers['X-Internal-Client-IP'] = clientIP
+      headers['X-Internal-Secret'] = config.internalProxySecret
+    }
+  }
 
   try {
     return await $fetch(path, {

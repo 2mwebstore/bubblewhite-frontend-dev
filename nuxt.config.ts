@@ -80,6 +80,17 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Top-level (not under `public`) keys are server-only — never sent
+    // to the client bundle. internalProxySecret specifically must never
+    // reach the browser: see useApi.js's own comment and the backend's
+    // config.InternalProxySecret for the full reasoning (it authenticates
+    // this server's own SSR-triggered calls to the backend so the real
+    // visitor's IP can be forwarded for rate limiting, without letting
+    // any arbitrary caller of the public backend API spoof the same
+    // header). Must be set to the SAME value as the backend's own
+    // INTERNAL_PROXY_SECRET env var.
+    internalProxySecret: process.env.INTERNAL_PROXY_SECRET || '',
+
     public: {
       // Same env var name Vite used before, so existing .env files/deploy
       // configs mostly carry over — Nuxt just needs the NUXT_PUBLIC_ prefix
